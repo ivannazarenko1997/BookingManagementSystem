@@ -14,7 +14,6 @@ import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.BookSearchCustomService;
 import com.example.bookstore.service.BookService;
 import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -52,9 +51,10 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
                                        MeterRegistry meterRegistry) {
         this.elasticsearchClient = elasticsearchClient;
         this.bookService = bookService;
-        this.meterRegistry =meterRegistry;
+        this.meterRegistry = meterRegistry;
 
     }
+
     private static String safeLower(String value) {
         return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
@@ -75,15 +75,15 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
         try {
             Query query = buildSearchQuery(queryText, title, author, genre, minPrice, maxPrice);
             SearchResponse<BookDocument> response = executeSearch(query, pageable);
-System.out.println("response="+response.toString());
+            System.out.println("response=" + response.toString());
             List<BookDocument> documents = hydrateDocuments(response);
-            System.out.println("documents="+documents.toString());
+            System.out.println("documents=" + documents.toString());
             long totalHits = response.hits().total() != null
                     ? response.hits().total().value()
                     : documents.size();
 
             List<BookDocument> sorted = applySorting(documents, pageable.getSort());
-            System.out.println("sorted="+documents.toString());
+            System.out.println("sorted=" + documents);
             List<BookSearchItem> result = sorted.stream()
                     .map(BookDocumentMapper::toSearchItem)
                     .toList();

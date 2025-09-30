@@ -17,6 +17,10 @@ public class BookEventListener {
         this.searchRepository = searchRepository;
     }
 
+    private static String safeLower(String s) {
+        return s == null ? "" : s.toLowerCase();
+    }
+
     @KafkaListener(
             topics = "${app.kafka.topics.book.events:book-events}",
             groupId = "${spring.kafka.consumer.group-id:bookstore-consumers}"
@@ -59,10 +63,6 @@ public class BookEventListener {
         } catch (Exception e) {
             log.error("Failed to delete document for event id={}. Event={}", event.getId(), event, e);
         }
-    }
-
-    private static String safeLower(String s) {
-        return s == null ? "" : s.toLowerCase();
     }
 
 

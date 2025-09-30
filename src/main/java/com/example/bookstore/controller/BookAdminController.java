@@ -55,6 +55,7 @@ public class BookAdminController {
     public BookResponse getBook(@PathVariable("id") Long id) {
         return bookAdminService.get(id);
     }
+
     @GetMapping
     public Page<BookResponse> getBooks(
             @ParameterObject Pageable pageable,

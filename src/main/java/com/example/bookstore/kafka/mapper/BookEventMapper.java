@@ -8,6 +8,7 @@ import com.example.bookstore.search.model.BookDocument;
 public final class BookEventMapper {
     private BookEventMapper() {
     }
+
     public static BookEvent toBookEvent(String type, Book entity) {
         return BookEvent.builder()
                 .id(entity.getId())

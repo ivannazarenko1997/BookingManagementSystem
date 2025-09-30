@@ -12,6 +12,7 @@ public interface BookAdminService {
     BookResponse create(BookRequest req);
 
     BookResponse update(Long id, BookRequest req);
+
     BookResponse get(Long id);
 
     void delete(Long id);

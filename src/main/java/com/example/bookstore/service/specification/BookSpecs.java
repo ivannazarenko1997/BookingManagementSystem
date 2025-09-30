@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public final class BookSpecs {
-    private BookSpecs(){
+    private BookSpecs() {
 
     }
 
@@ -34,11 +34,13 @@ public final class BookSpecs {
             }
 
             if (StringUtils.hasText(author)) {
-                searchConditions.add(cb.like(cb.lower(root.join("author").get("name")), "%" + author.toLowerCase() + "%"));
+                searchConditions.add(cb.like(cb.lower(root.join("author").get("name")),
+                        "%" + author.toLowerCase() + "%"));
             }
 
             if (StringUtils.hasText(genre)) {
-                searchConditions.add(cb.like(cb.lower(root.join("genre").get("name")), "%" + genre.toLowerCase() + "%"));
+                searchConditions.add(cb.like(cb.lower(root.join("genre").get("name")),
+                        "%" + genre.toLowerCase() + "%"));
             }
 
             if (minPrice != null) {

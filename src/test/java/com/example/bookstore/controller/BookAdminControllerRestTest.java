@@ -34,7 +34,7 @@ class BookAdminControllerRestTest {
 
     private static final String BASE_URL = "/api/v1/admin/books";
 
-    private static final  String json = """
+    private static final  String jsonPayload = """
                      {
                     "title": "Domain-Driven Design",
                     "authorId": 2,
@@ -59,7 +59,7 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isCreated());
     }
 
@@ -70,7 +70,7 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(put(BASE_URL + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isOk());
     }
 
@@ -105,11 +105,9 @@ class BookAdminControllerRestTest {
     @DisplayName("Admin can create book with decimal price")
     @WithMockUser(roles = "ADMIN")
     void createBook_withDecimalPrice_returnsCreated() throws Exception {
-
-
-        mockMvc.perform(post(BASE_URL)
+       mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isCreated());
     }
 
@@ -120,7 +118,7 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(put(BASE_URL + "/2")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isOk());
     }
 
@@ -153,7 +151,7 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isCreated());
     }
 
@@ -162,11 +160,9 @@ class BookAdminControllerRestTest {
     @DisplayName("User role cannot create book")
     @WithMockUser(roles = "USER")
     void createBook_asUser_returnsForbidden() throws Exception {
-
-
-        mockMvc.perform(post(BASE_URL)
+       mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isForbidden());
     }
 
@@ -243,7 +239,7 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(put(BASE_URL + "/"+data)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -302,13 +298,13 @@ class BookAdminControllerRestTest {
 
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isForbidden());
 
 
         mockMvc.perform(put(BASE_URL + "/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonPayload))
                 .andExpect(status().isForbidden());
 
 

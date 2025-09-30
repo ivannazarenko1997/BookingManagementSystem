@@ -38,9 +38,10 @@ public class BookAdminServiceImpl implements BookAdminService {
     private final GenreService genreService;
     private final BookEventPublisher bookEventPublisher;
 
-    private Counter createCounter;
-    private Counter updateCounter;
-    private Counter deleteCounter;
+    private final Counter createCounter;
+    private final Counter updateCounter;
+    private final Counter deleteCounter;
+
     public BookAdminServiceImpl(BookService bookService,
                                 AuthorService authorService,
                                 GenreService genreService,
@@ -64,6 +65,7 @@ public class BookAdminServiceImpl implements BookAdminService {
                 .description("Number of books deleted")
                 .register(this.meterRegistry);
     }
+
     @Override
     public Page<BookResponse> list(BookFilter filter, Pageable pageable) {
         Specification<Book> specification = BookSpecs.matches(

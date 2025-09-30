@@ -72,9 +72,9 @@ public class BookServiceImpl implements BookService {
         if (CollectionUtils.isEmpty(ids)) {
             return List.of();
         }
-         List<BookDocument> cachedDocuments = bookCache.getAllByIds(ids);
+        List<BookDocument> cachedDocuments = bookCache.getAllByIds(ids);
 
-System.out.println("cachedDocuments="+cachedDocuments.toString());
+        System.out.println("cachedDocuments=" + cachedDocuments.toString());
         Set<Long> cachedIds = cachedDocuments.stream()
                 .filter(Objects::nonNull)
                 .map(BookDocument::getId)
@@ -85,14 +85,14 @@ System.out.println("cachedDocuments="+cachedDocuments.toString());
                 .filter(Objects::nonNull)
                 .filter(id -> !cachedIds.contains(id))
                 .toList();
-        System.out.println("missingIds="+missingIds.toString());
+        System.out.println("missingIds=" + missingIds);
         List<Book> missingBooks = findBooksByIds(missingIds);
-        System.out.println("missingBooks="+missingBooks.toString());
+        System.out.println("missingBooks=" + missingBooks.toString());
         List<BookDocument> missingDocuments = missingBooks.stream()
                 .map(BookDocumentMapper::toDocument)
                 .filter(Objects::nonNull)
                 .toList();
-        System.out.println("missingDocuments="+missingDocuments.toString());
+        System.out.println("missingDocuments=" + missingDocuments);
         if (!missingDocuments.isEmpty()) {
             bookCache.putAll(missingDocuments);
         }

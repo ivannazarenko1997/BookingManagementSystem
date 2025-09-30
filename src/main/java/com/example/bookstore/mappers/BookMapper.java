@@ -11,6 +11,7 @@ import com.example.bookstore.dto.GenreResponse;
 public final class BookMapper {
     private BookMapper() {
     }
+
     public static BookResponse toDto(Book book) {
         if (book == null) {
             return null;

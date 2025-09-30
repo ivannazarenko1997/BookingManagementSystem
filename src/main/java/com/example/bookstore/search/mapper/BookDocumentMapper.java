@@ -28,12 +28,12 @@ public final class BookDocumentMapper {
             return null;
         }
         return
-        BookSearchItem.builder()
-                 .id(document.getId())
-                 .title(document.getTitle())
-                .authorName(document.getAuthorName())
-                .genreName(document.getGenreName())
-                .price(document.getPrice()).build();
+                BookSearchItem.builder()
+                        .id(document.getId())
+                        .title(document.getTitle())
+                        .authorName(document.getAuthorName())
+                        .genreName(document.getGenreName())
+                        .price(document.getPrice()).build();
     }
 
     public static BookDocument toDocument(Book book) {

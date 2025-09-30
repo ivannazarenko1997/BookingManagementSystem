@@ -34,7 +34,7 @@ public class BookCacheFacade implements BookCache {
         }
         final Set<Long> uniqueIds = new LinkedHashSet<>();
         for (BookDocument doc : documents) {
-            if (doc != null && doc.getId()!=null) {
+            if (doc != null && doc.getId() != null) {
                 final Long id = doc.getId();
                 if (uniqueIds.add(id)) {
                     booksByIdCache.put(id, doc);
