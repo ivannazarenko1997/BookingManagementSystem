@@ -121,9 +121,8 @@ public class BookAdminServiceImpl implements BookAdminService {
         }
 
         BookEvent event = BookEventMapper.toBookEvent(BookEventType.UPDATE.getCode(), updated);
-        System.out.println("updated.getId()=" + updated.getId() + " updated=" + updated.toString());
+        log.info("Updated book with id={} and payload={}", updated.getId(), updated);
         publishBookEventAfterCommit(event, updated.getId());
-
 
         return BookMapper.toDto(updated);
     }

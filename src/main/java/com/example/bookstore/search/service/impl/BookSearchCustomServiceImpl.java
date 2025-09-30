@@ -67,15 +67,12 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
         try {
             Query query = buildSearchQuery(queryText, title, author, genre, minPrice, maxPrice);
             SearchResponse<BookDocument> response = executeSearch(query, pageable);
-            System.out.println("response=" + response.toString());
             List<BookDocument> documents = hydrateDocuments(response);
-            System.out.println("documents=" + documents.toString());
             long totalHits = response.hits().total() != null
                     ? response.hits().total().value()
                     : documents.size();
 
             List<BookDocument> sorted = applySorting(documents, pageable.getSort());
-            System.out.println("sorted=" + documents);
             List<BookSearchItem> result = sorted.stream()
                     .map(BookDocumentMapper::toSearchItem)
                     .toList();
