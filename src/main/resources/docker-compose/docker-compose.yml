@@ -1,45 +1,23 @@
 version: "3.8"
 services:
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3.11-management
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    # rabbitmq-plugins enable rabbitmq_management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-
   redis:
     container_name: redis
     image: redis:6.0
     hostname: redis
     ports:
       - "6379:6379"
-
-  sftp:
-    container_name: sftp
-    image: atmoz/sftp
-    # volumes:
-    #     - ~/upload:/home/foo/upload
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
     ports:
-      - "2222:22"
-    command: user:password:::upload
-
-  ftp:
-    container_name: vsftpd
-    image: fauria/vsftpd
+      - "9411:9411"       # UI: http://localhost:9411
     environment:
-      FTP_USER: user
-      FTP_PASS: pass
-      LOG_STDOUT: yes
-      PASV_ADDRESS: 127.0.0.1
-      PASV_MIN_PORT: 21100
-      PASV_MAX_PORT: 21110
-    ports:
-      - "8021:21"
-      - "21100-21110:21100-21110"
+      - JAVA_OPTS=-Dlogging.level.zipkin2=INFO
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:9411/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   postgresql:
     image: postgres:16

@@ -1,6 +1,8 @@
 server:
   port: 8080
 spring:
+  application:
+    name: bookstore-service
   datasource:
     url: jdbc:postgresql://localhost:5432/bookingstore
     username: postgres
@@ -18,6 +20,7 @@ spring:
     clean-on-validation-error: true
     clean-disabled: false
     debug: true
+
 
   kafka:
     client-id: bookstore-service
@@ -61,12 +64,7 @@ spring:
 
   elasticsearch:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
-logging:
-  level:
-    org.hibernate.SQL: INFO
-    org.springframework.data.elasticsearch.client.elc: TRACE
-    org.springframework.cache: TRACE
-    org.springframework.data.redis: DEBUG
+
 app:
   cache:
     booksByIdTtlSeconds: 3600
@@ -83,6 +81,18 @@ app:
       fail-on-error: false
 
 management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    opentelemetry:
+      export:
+        schedule-delay: 1s       # batch flush interval      # 1.0 = sample all (turn down in prod)
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+      enabled: true
+
   endpoints:
     web:
       exposure:
@@ -97,7 +107,19 @@ management:
     health:
       show-details: always
 
+
+
   prometheus:
     metrics:
       export:
         enabled: true
+
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:-},trace=%X{traceId:-},span=%X{spanId:-}]"
+  level:
+    org.hibernate.SQL: INFO
+    org.springframework.data.elasticsearch.client.elc: TRACE
+    org.springframework.cache: TRACE
+    org.springframework.data.redis: DEBUG

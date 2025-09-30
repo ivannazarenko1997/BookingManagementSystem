@@ -17,29 +17,54 @@ public class BookEventListener {
         this.searchRepository = searchRepository;
     }
 
-    @KafkaListener(topics = "${app.kafka.topics.book.events:book-events}",
-            groupId = "${spring.kafka.consumer.group-id:bookstore-consumers}")
+    @KafkaListener(
+            topics = "${app.kafka.topics.book.events:book-events}",
+            groupId = "${spring.kafka.consumer.group-id:bookstore-consumers}"
+    )
     public void onEvent(BookEvent event) {
+        if (event == null) {
+            log.error("Received null BookEvent");
+            return;
+        }
+        final String type = safeLower(event.getType());
 
-        System.out.println("onEvent");
-        switch (event.getType()) {
-            case "create", "update" -> {
-                try {
-                    System.out.println("event=" + event);
-                    BookDocument bookDocument = BookEventMapper.toDocument(event);
-                    searchRepository.save(bookDocument);
-                } catch (Exception e) {
-                    log.error("error while processing data from kafka topic event:{}", event, e);
-                }
-            }
-            case "delete" -> {
-                try {
-                    searchRepository.deleteById(event.getId());
-                } catch (Exception e) {
-                    log.error("error while processing data from kafka delete topic event:{}", event, e);
-                }
-
+        switch (type) {
+            case "create", "update" -> handleUpsert(event);
+            case "delete" -> handleDelete(event);
+            default -> {
+                IllegalArgumentException ex =
+                        new IllegalArgumentException("Unknown BookEvent type: " + event.getType());
+                log.error("Unsupported event type for event id={}. Event={}", event.getId(), event, ex);
             }
         }
     }
+
+    private void handleUpsert(BookEvent event) {
+        try {
+            BookDocument doc = BookEventMapper.toDocument(event);
+            searchRepository.save(doc);
+            log.info("Upserted book document id={} via event type={}", doc.getId(), event.getType());
+        } catch (Exception e) {
+            log.error("Failed to upsert document for event id={}. Event={}", event.getId(), event, e);
+        }
+    }
+
+    private void handleDelete(BookEvent event) {
+        try {
+            if (event.getId() == null) {
+                throw new IllegalArgumentException("Delete event must contain non-null id");
+            }
+            searchRepository.deleteById(event.getId());
+            log.info("Deleted book document id={} via event type=delete", event.getId());
+        } catch (Exception e) {
+            log.error("Failed to delete document for event id={}. Event={}", event.getId(), event, e);
+        }
+    }
+
+    private static String safeLower(String s) {
+        return s == null ? "" : s.toLowerCase();
+    }
+
+
+
 }

@@ -184,7 +184,7 @@ class BookAdminControllerRestTest {
     @WithMockUser(roles = "ADMIN")
     void createBook_withMissingTitle_returnsBadRequest() throws Exception {
 
-        String json = """
+        String jsonMissingTitle = """
                      {
                     "authorId": 2,
                     "genreId": 1,
@@ -202,7 +202,7 @@ class BookAdminControllerRestTest {
                 """;
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonMissingTitle))
                 .andExpect(status().isBadRequest());
     }
 
@@ -210,7 +210,7 @@ class BookAdminControllerRestTest {
     @DisplayName("Negative price returns bad request")
     @WithMockUser(roles = "ADMIN")
     void createBook_withNegativePrice_returnsBadRequest() throws Exception {
-         String json = """
+         String jsonBadRequest = """
                      {
                     "title": "Domain-Driven Design",
                     "authorId": 2,
@@ -229,7 +229,7 @@ class BookAdminControllerRestTest {
                 """;
         mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                        .content(jsonBadRequest))
                 .andExpect(status().isBadRequest());
     }
 

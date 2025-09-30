@@ -5,7 +5,7 @@ import com.example.bookstore.domain.BookIndexProjection;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.model.BookDocument;
 
-public class BookDocumentMapper {
+public final class BookDocumentMapper {
 
     private BookDocumentMapper() {
     }

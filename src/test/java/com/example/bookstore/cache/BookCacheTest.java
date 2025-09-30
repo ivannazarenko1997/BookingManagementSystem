@@ -1,6 +1,5 @@
 package com.example.bookstore.cache;
 
-import com.example.bookstore.cache.BookCache;
 import com.example.bookstore.cache.impl.BookCacheFacade;
 import com.example.bookstore.search.model.BookDocument;
 import org.junit.jupiter.api.BeforeEach;

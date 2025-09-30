@@ -6,6 +6,8 @@ import com.example.bookstore.kafka.event.BookEvent;
 import com.example.bookstore.search.model.BookDocument;
 
 public final class BookEventMapper {
+    private BookEventMapper() {
+    }
     public static BookEvent toBookEvent(String type, Book entity) {
         return BookEvent.builder()
                 .id(entity.getId())
@@ -30,13 +32,13 @@ public final class BookEventMapper {
             return null;
         }
 
-        BookDocument doc = new BookDocument();
-        doc.setId(event.getId());
-        doc.setTitle(event.getTitle());
-        doc.setAuthorName(event.getAuthorName());
-        doc.setGenreName(event.getGenreName());
-        doc.setPrice(event.getPrice());
-        return doc;
+        return BookDocument.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .authorName(event.getAuthorName())
+                .genreName(event.getGenreName())
+                .price(event.getPrice())
+                .build();
     }
 
 

@@ -37,7 +37,7 @@ public class BookAdminServiceImpl implements BookAdminService {
     private final AuthorService authorService;
     private final GenreService genreService;
     private final BookEventPublisher bookEventPublisher;
-    private final MeterRegistry registry;
+    private final MeterRegistry meterRegistry;
     private Counter createCounter;
     private Counter updateCounter;
     private Counter deleteCounter;
@@ -45,24 +45,24 @@ public class BookAdminServiceImpl implements BookAdminService {
                                 AuthorService authorService,
                                 GenreService genreService,
                                 BookEventPublisher bookEventPublisher,
-                                MeterRegistry registry) {
+                                MeterRegistry meterRegistry) {
         this.bookService = bookService;
         this.authorService = authorService;
         this.genreService = genreService;
         this.bookEventPublisher = bookEventPublisher;
-        this.registry = registry;
+        this.meterRegistry = meterRegistry;
 
         this.createCounter = Counter.builder("book.create.count")
                 .description("Number of books created")
-                .register(registry);
+                .register(meterRegistry);
 
         this.updateCounter = Counter.builder("book.update.count")
                 .description("Number of books updated")
-                .register(registry);
+                .register(meterRegistry);
 
         this.deleteCounter = Counter.builder("book.delete.count")
                 .description("Number of books deleted")
-                .register(registry);
+                .register(meterRegistry);
     }
     @Override
     public Page<BookResponse> list(BookFilter filter, Pageable pageable) {

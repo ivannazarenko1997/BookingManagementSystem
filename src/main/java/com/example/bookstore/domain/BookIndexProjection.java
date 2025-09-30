@@ -1,9 +1,6 @@
 package com.example.bookstore.domain;
 
-import lombok.Builder;
-
 import java.math.BigDecimal;
-
 
 
 public interface BookIndexProjection {

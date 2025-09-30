@@ -101,7 +101,7 @@ class ApiExceptionHandlerTest {
 
     @Test
     @DisplayName("NoHandlerFound -> 404 'Endpoint not found'")
-    void handleNoHandlerFound_returns404() throws Exception {
+    void handleNoHandlerFound_returns404()  {
         HttpServletRequest req = mockReq("/nope");
         NoHandlerFoundException ex =
                 new NoHandlerFoundException("GET", "/nope", new HttpHeaders());

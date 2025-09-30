@@ -2,7 +2,6 @@ package com.example.bookstore.controller;
 
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.service.BookSearchCustomService;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -34,7 +33,6 @@ public class BookController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice
     ) {
-        System.out.println("getBooks");
         return bookSearchService.searchBooks(q, title, author, genre, minPrice, maxPrice, pageable);
     }
 }

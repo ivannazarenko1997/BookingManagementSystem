@@ -8,7 +8,9 @@ import com.example.bookstore.dto.BookRequest;
 import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.dto.GenreResponse;
 
-public class BookMapper {
+public final class BookMapper {
+    private BookMapper() {
+    }
     public static BookResponse toDto(Book book) {
         if (book == null) {
             return null;

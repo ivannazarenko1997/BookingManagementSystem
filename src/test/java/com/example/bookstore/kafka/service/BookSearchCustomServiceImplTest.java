@@ -144,7 +144,7 @@ class BookSearchCustomServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
         Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
 
-        assertThat(page.getTotalElements()).isEqualTo(0);
+        assertThat(page.getTotalElements()).isZero();
         assertThat(page.getContent()).isEmpty();
     }
 
@@ -163,7 +163,7 @@ class BookSearchCustomServiceImplTest {
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
         Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
 
-        assertThat(page.getTotalElements()).isEqualTo(0);
+        assertThat(page.getTotalElements()).isZero();
         assertThat(page.getContent()).isEmpty();
     }
 
@@ -185,7 +185,7 @@ class BookSearchCustomServiceImplTest {
             Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
             Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
 
-            assertThat(page.getTotalElements()).isEqualTo(0);
+            assertThat(page.getTotalElements()).isZero();
             assertThat(page.getContent()).isEmpty();
         }
     }

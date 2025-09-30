@@ -1,6 +1,6 @@
 package com.example.bookstore.search.dto;
 
-import lombok.AllArgsConstructor;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;

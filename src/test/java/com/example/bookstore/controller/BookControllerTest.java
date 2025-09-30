@@ -1,7 +1,6 @@
 package com.example.bookstore.controller;
 
 
-import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.service.BookSearchCustomService;
 import com.example.bookstore.web.ApiExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -44,24 +44,15 @@ class BookControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void shouldAllowAdminAccessAndInvokeService() throws Exception {
-        mockMvc.perform(get("/api/v1/books"))
-                .andExpect(status().isOk());
-
-        verify(bookSearchService).searchBooks(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any());
+        assertAccessAllowedForRole("ADMIN");
     }
 
     @Test
     @WithMockUser(roles = "USER")
     void shouldAllowUserAccessAndInvokeService() throws Exception {
-        mockMvc.perform(get("/api/v1/books"))
-                .andExpect(status().isOk());
-
-        verify(bookSearchService).searchBooks(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any(), Mockito.any(), Mockito.any());
+        assertAccessAllowedForRole("USER");
     }
+
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -115,4 +106,15 @@ class BookControllerTest {
         mockMvc.perform(patch("/api/v1/books"))
                 .andExpect(status().isMethodNotAllowed());
     }
+
+    private void assertAccessAllowedForRole(String role) throws Exception {
+        mockMvc.perform(get("/api/v1/books")
+                        .with(user("testUser").roles(role)))
+                .andExpect(status().isOk());
+
+        verify(bookSearchService).searchBooks(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
 }

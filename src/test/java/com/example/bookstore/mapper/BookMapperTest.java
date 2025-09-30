@@ -9,7 +9,6 @@ import com.example.bookstore.mappers.BookMapper;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,8 +30,6 @@ class BookMapperTest {
         book.setAuthor(author);
         book.setGenre(genre);
         book.setPrice(BigDecimal.valueOf(19.99));
-        //book.setCreatedAt(LocalDateTime.now());
-        //book.setUpdatedAt(LocalDateTime.now());
         book.setCaption("A timeless romance");
         book.setDescription("A novel about manners and marriage.");
         book.setIsbn("1234567890");

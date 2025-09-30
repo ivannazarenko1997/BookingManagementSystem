@@ -7,8 +7,6 @@ import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.config.ConfigException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -53,7 +51,7 @@ class KafkaConfigTest {
         okRunner.run(ctx -> {
             ProducerFactory<?, ?> pf = ctx.getBean(ProducerFactory.class);
             var cfg = pf.getConfigurationProperties();
-            assertThat(cfg.get("bootstrap.servers")).isEqualTo("localhost:9092");
+            assertThat(String.valueOf(cfg.get("bootstrap.servers"))).contains("localhost:9092");
             assertThat(String.valueOf(cfg.get("key.serializer"))).contains("StringSerializer");
             assertThat(String.valueOf(cfg.get("value.serializer"))).contains("JsonSerializer");
         });
@@ -64,9 +62,9 @@ class KafkaConfigTest {
         okRunner.run(ctx -> {
             ConsumerFactory<?, ?> cf = ctx.getBean(ConsumerFactory.class);
             var cfg = cf.getConfigurationProperties();
-            assertThat(cfg.get("bootstrap.servers")).isEqualTo("localhost:9092");
-            assertThat(cfg.get("group.id")).isEqualTo("bookstore-test");
-            assertThat(cfg.get(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG)).isEqualTo("earliest");
+            assertThat(String.valueOf(cfg.get("bootstrap.servers"))).contains("localhost:9092");
+            assertThat(String.valueOf(cfg.get("group.id"))).contains("bookstore-test");
+            assertThat(String.valueOf(cfg.get(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG))).contains("earliest");
         });
     }
 

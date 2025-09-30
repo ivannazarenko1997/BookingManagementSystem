@@ -13,10 +13,9 @@ import com.example.bookstore.search.mapper.BookDocumentMapper;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.BookSearchCustomService;
 import com.example.bookstore.service.BookService;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -50,23 +49,18 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
         this.elasticsearchClient = elasticsearchClient;
         this.bookService = bookService;
         this.meterRegistry =meterRegistry;
-        this.createCounter = Counter.builder("books.operations.total")
-                .description("Total created books")
-                .tag("operation", "create")
-                .tag("component", "service")
-                .register(meterRegistry);
 
-        this.updateCounter = Counter.builder("books.operations.total")
-                .description("Total updated books")
-                .tag("operation", "update")
-                .tag("component", "service")
-                .register(meterRegistry);
     }
     private static String safeLower(String value) {
         return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 
     @Override
+    @Timed(
+            value = "books.search.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "service"}
+    )
     public Page<BookSearchItem> searchBooks(String queryText,
                                             String title,
                                             String author,

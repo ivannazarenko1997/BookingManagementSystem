@@ -4,8 +4,6 @@ import com.example.bookstore.dto.BookRequest;
 import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.service.BookAdminService;
 import com.example.bookstore.service.filter.BookFilter;
-import io.micrometer.core.annotation.Counted;
-import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -38,36 +36,26 @@ public class BookAdminController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-  //  @Timed(value = "books.create.timer")
-//    @Counted(value = "books.create.count")
     public BookResponse createBook(@Valid @RequestBody BookRequest request) {
         return bookAdminService.create(request);
     }
 
     @PutMapping("/{id}")
-  //  @Timed(value = "books.update.timer")
-  //  @Counted(value = "books.update.count")
     public BookResponse updateBook(@PathVariable("id") Long id, @Valid @RequestBody BookRequest request) {
         return bookAdminService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-   // @Timed(value = "books.delete.timer")
-   // @Counted(value = "books.delete.count")
     public void deleteBook(@PathVariable("id") Long id) {
         bookAdminService.delete(id);
     }
 
     @GetMapping("/{id}")
-  //  @Timed(value = "books.get.timer")
-  //  @Counted(value = "books.get.count")
     public BookResponse getBook(@PathVariable("id") Long id) {
         return bookAdminService.get(id);
     }
     @GetMapping
-  //  @Timed(value = "books.getBooksDb.timer")
-  //  @Counted(value = "books.getBooksDb.count")
     public Page<BookResponse> getBooks(
             @ParameterObject Pageable pageable,
             @RequestParam(required = false) String query,

@@ -23,17 +23,17 @@ class BookSpecsTest {
 
     @Test
     void shouldCreateSpecificationWithTitleOnly() {
-        Root<Book> root = mock(Root.class);
-        CriteriaQuery<?> query = mock(CriteriaQuery.class);
-        CriteriaBuilder cb = mock(CriteriaBuilder.class);
+        Root<Book> rootBook = mock(Root.class);
+        CriteriaQuery<?> queryBook = mock(CriteriaQuery.class);
+        CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
         Path<String> titlePath = mock(Path.class);
-        when(root.get("title")).thenReturn((Path) titlePath);
-        when(cb.lower(titlePath)).thenReturn(titlePath);
-        when(cb.like(titlePath, "%harry%")).thenReturn(mock(Predicate.class));
-        when(cb.and(any())).thenReturn(mock(Predicate.class));
+        when(rootBook.get("title")).thenReturn((Path) titlePath);
+        when(criteriaBuilder.lower(titlePath)).thenReturn(titlePath);
+        when(criteriaBuilder.like(titlePath, "%harry%")).thenReturn(mock(Predicate.class));
+        when(criteriaBuilder.and(any())).thenReturn(mock(Predicate.class));
 
         Specification<Book> spec = BookSpecs.matches(null, "harry", null, null, null, null);
-        Predicate predicate = spec.toPredicate(root, query, cb);
+        Predicate predicate = spec.toPredicate(rootBook, queryBook, criteriaBuilder);
 
         assertThat(predicate).isNotNull();
     }

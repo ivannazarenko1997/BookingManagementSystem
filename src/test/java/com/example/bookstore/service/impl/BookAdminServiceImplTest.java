@@ -14,7 +14,6 @@ import com.example.bookstore.service.GenreService;
 import com.example.bookstore.service.filter.BookFilter;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
@@ -48,20 +47,11 @@ class BookAdminServiceImplTest {
         updateCounter = mock(Counter.class);
         deleteCounter = mock(Counter.class);
 
-
-    //    when(meterRegistry.counter("book.create.count")).thenReturn(createCounter);
-      //  when(meterRegistry.counter("book.update.count")).thenReturn(updateCounter);
-
         service = new BookAdminServiceImpl(bookService, authorService, genreService, bookEventPublisher,meterRegistry);
         org.springframework.test.util.ReflectionTestUtils.setField(service, "createCounter", createCounter);
         org.springframework.test.util.ReflectionTestUtils.setField(service, "updateCounter", updateCounter);
         org.springframework.test.util.ReflectionTestUtils.setField(service, "deleteCounter", deleteCounter);
 
-    }
-    private static java.util.Set<String> toStringTags(Iterable<Tag> tags) {
-        java.util.Set<String> out = new java.util.HashSet<>();
-        for (Tag t : tags) out.add(t.getKey() + "=" + t.getValue());
-        return out;
     }
 
     @Test
@@ -124,7 +114,6 @@ class BookAdminServiceImplTest {
 
         verify(updateCounter, times(1)).increment();
         verifyNoMoreInteractions(createCounter);
-     //   verifyNoInteractions(updateCounter);
         assertThat(response.getId()).isEqualTo(5L);
         assertThat(response.getTitle()).isEqualTo("Updated Book");
     }
@@ -172,8 +161,7 @@ class BookAdminServiceImplTest {
         when(authorService.findById(1L)).thenReturn(author);
         when(genreService.findById(2L)).thenReturn(genre);
         when(bookService.saveAndFlush(any())).thenReturn(book);
-     //   org.springframework.test.util.ReflectionTestUtils.setField(service, "createCounter", createCounter);
-     //   org.springframework.test.util.ReflectionTestUtils.setField(service, "updateCounter", updateCounter);
+
         service.create(request);
         verify(createCounter, times(1)).increment();
         verifyNoMoreInteractions(createCounter);

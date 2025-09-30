@@ -48,7 +48,7 @@ class SearchReindexerTest {
     }
 
     @Test
-    void shouldSkipReindexIfDisabled() throws Exception {
+    void shouldSkipReindexIfDisabled()   {
         setField("reindexOnStart", false);
 
         ApplicationArguments args = mock(ApplicationArguments.class);
@@ -59,7 +59,7 @@ class SearchReindexerTest {
     }
 
     @Test
-    void shouldReindexBooksWhenEnabled() throws Exception {
+    void shouldReindexBooksWhenEnabled() {
 
 
         BookIndexProjection projection1 = mock(BookIndexProjection.class);
@@ -94,7 +94,7 @@ class SearchReindexerTest {
     }
 
     @Test
-    void shouldHandleExceptionGracefullyWhenFailOnErrorFalse() throws Exception {
+    void shouldHandleExceptionGracefullyWhenFailOnErrorFalse()  {
         when(bookService.findBooksForIndexing(any())).thenThrow(new RuntimeException("Boom"));
 
         ApplicationArguments args = mock(ApplicationArguments.class);

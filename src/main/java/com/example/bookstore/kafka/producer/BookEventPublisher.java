@@ -1,11 +1,12 @@
 package com.example.bookstore.kafka.producer;
 
 import com.example.bookstore.kafka.event.BookEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-
+@Slf4j
 @Service
 public class BookEventPublisher {
     private final KafkaTemplate<String, BookEvent> template;
@@ -19,7 +20,7 @@ public class BookEventPublisher {
     }
 
     public void publish(BookEvent event) {
-        System.out.println("topic=" + topic + " publish event=" + event.toString());
+        log.info("Publishing event to topic={} event={}", topic, event);
         template.send(topic, String.valueOf(event.getId()), event);
     }
 }
