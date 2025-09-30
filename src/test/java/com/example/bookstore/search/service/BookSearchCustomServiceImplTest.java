@@ -2,6 +2,12 @@ package com.example.bookstore.search.service;
 
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -12,8 +18,6 @@ import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.impl.BookSearchCustomServiceImpl;
 import com.example.bookstore.service.BookService;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -24,21 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-
 class BookSearchCustomServiceImplTest {
 
     private ElasticsearchClient elasticsearchClient;
     private BookService bookService;
     private BookSearchCustomServiceImpl service;
-    private MeterRegistry meterRegistry;
     @BeforeEach
     void setup() {
-        meterRegistry = new SimpleMeterRegistry();
         elasticsearchClient = mock(ElasticsearchClient.class);
         bookService = mock(BookService.class);
-        service = new BookSearchCustomServiceImpl(elasticsearchClient, bookService,meterRegistry);
+        service = new BookSearchCustomServiceImpl(elasticsearchClient, bookService);
     }
 
     @Test

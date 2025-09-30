@@ -69,7 +69,6 @@ public class SearchReindexer implements ApplicationRunner {
                         System.out.println("book =" + book.toString()); // or access fields like book.getTitle()
                     }
                     totalIndexed += docs.size();
-
                     log.info("Indexed batch page={} size={} (total={})", page, docs.size(), totalIndexed);
 
                 }

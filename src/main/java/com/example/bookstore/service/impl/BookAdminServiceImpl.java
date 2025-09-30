@@ -89,6 +89,8 @@ public class BookAdminServiceImpl implements BookAdminService {
         try {
             Book entity = BookMapper.toEntity(request, author, genre);
             saved = bookService.saveAndFlush(entity);
+
+            createCounter.increment();
         } catch (Exception e) {
             log.error("Failed to create book: {}", request, e);
             throw new BookStoreException("Failed to create book: " + request, e);
@@ -96,7 +98,8 @@ public class BookAdminServiceImpl implements BookAdminService {
 
         BookEvent event = BookEventMapper.toBookEvent(BookEventType.CREATE.getCode(), saved);
         publishBookEventAfterCommit(event, saved.getId());
-        createCounter.increment();
+
+
         return BookMapper.toDto(saved);
     }
 
@@ -111,14 +114,17 @@ public class BookAdminServiceImpl implements BookAdminService {
         try {
             BookMapper.updateEntity(existing, request, author, genre);
             updated = bookService.saveAndFlush(existing);
+            updateCounter.increment();
         } catch (Exception e) {
             log.error("Failed to update book: {}", request, e);
             throw new BookStoreException("Failed to update book: " + request, e);
         }
 
         BookEvent event = BookEventMapper.toBookEvent(BookEventType.UPDATE.getCode(), updated);
+        System.out.println("updated.getId()=" + updated.getId() + " updated=" + updated.toString());
         publishBookEventAfterCommit(event, updated.getId());
-        updateCounter.increment();
+
+
         return BookMapper.toDto(updated);
     }
 
@@ -134,6 +140,8 @@ public class BookAdminServiceImpl implements BookAdminService {
 
         try {
             bookService.delete(existing);
+            deleteCounter.increment();
+
         } catch (Exception e) {
             log.error("Failed to delete bookId: {}", id, e);
             throw new BookStoreException("Failed to delete bookId: " + id, e);
@@ -141,7 +149,8 @@ public class BookAdminServiceImpl implements BookAdminService {
 
         BookEvent event = BookEventMapper.toBookEvent(BookEventType.DELETE.getCode(), id);
         publishBookEventAfterCommit(event, id);
-        deleteCounter.increment();
+
+
     }
 
     private void publishBookEventAfterCommit(BookEvent event, Long bookId) {

@@ -1,6 +1,14 @@
 package com.example.bookstore.kafka.consumer;
 
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.example.bookstore.kafka.event.BookEvent;
 import com.example.bookstore.kafka.mapper.BookEventMapper;
 import com.example.bookstore.search.model.BookDocument;
@@ -10,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookEventListenerTest {
@@ -46,10 +52,10 @@ class BookEventListenerTest {
 
         BookDocument doc = new BookDocument();
         doc.setId(2L);
-
         try (MockedStatic<BookEventMapper> mocked = mockStatic(BookEventMapper.class)) {
             mocked.when(() -> BookEventMapper.toDocument(event)).thenReturn(doc);
             listener.onEvent(event);
+            verify(searchRepository).deleteById(doc.getId());
             verify(searchRepository).save(doc);
             verifyNoMoreInteractions(searchRepository);
         }

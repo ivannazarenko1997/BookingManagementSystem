@@ -14,7 +14,6 @@ import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.BookSearchCustomService;
 import com.example.bookstore.service.BookService;
 import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,21 +42,15 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
     private final ElasticsearchClient elasticsearchClient;
     private final BookService bookService;
-    private final MeterRegistry meterRegistry;
 
 
     public BookSearchCustomServiceImpl(ElasticsearchClient elasticsearchClient,
-                                       BookService bookService,
-                                       MeterRegistry meterRegistry) {
+                                       BookService bookService) {
         this.elasticsearchClient = elasticsearchClient;
         this.bookService = bookService;
-        this.meterRegistry = meterRegistry;
 
     }
 
-    private static String safeLower(String value) {
-        return value == null ? null : value.toLowerCase(Locale.ROOT);
-    }
 
     @Override
     @Timed(
@@ -105,6 +98,10 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
                         .query(query),
                 BookDocument.class
         );
+    }
+
+    private static String safeLower(String value) {
+        return value == null ? null : value.toLowerCase(Locale.ROOT);
     }
 
     private List<BookDocument> hydrateDocuments(SearchResponse<BookDocument> response) {

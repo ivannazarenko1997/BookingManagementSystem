@@ -112,6 +112,24 @@ curl -X POST 'http://localhost:8080/api/v1/books' \
 "coverImageUrl": "https://example.com/ddd.jpg"
 }'
 
+curl -X PUT 'http://localhost:8080/api/v1/books/9' \
+-u admin:admin123 \
+-H 'Content-Type: application/json' \
+-d '{
+"title": "Domain-Driven Design (Updated)",
+"authorId": 2,
+"genreId": 1,
+"price": 59.99,
+"caption": "Blue hardcover, 2nd print",
+"description": "Evans classic on DDD — updated notes",
+"isbn": "978-0321125217",
+"publishedYear": 2003,
+"publisher": "Addison-Wesley",
+"pageCount": 560,
+"language": "en",
+"stock": 12,
+"coverImageUrl": "https://example.com/ddd-v2.jpg"
+}'
 http://localhost:8080/actuator/metrics/book.create.count
 
 http://localhost:8080/actuator/metrics/books.search.timer

@@ -48,43 +48,43 @@ public final class BookMapper {
                 .build();
     }
 
-    public static Book toEntity(BookRequest req, Author author, Genre genre) {
-        Book b = new Book();
-        b.setTitle(req.getTitle());
-        b.setAuthor(author);
-        b.setGenre(genre);
-        b.setPrice(req.getPrice());
-        b.setCaption(req.getCaption());
-        b.setDescription(req.getDescription());
-        b.setIsbn(nvlBlankToNull(req.getIsbn()));
-        b.setPublishedYear(req.getPublishedYear());
-        b.setPublisher(req.getPublisher());
-        b.setPageCount(req.getPageCount());
-        b.setLanguage(req.getLanguage());
-        if (req.getStock() != null) {
-            b.setStock(req.getStock());
+    public static Book toEntity(BookRequest request, Author author, Genre genre) {
+        Book book = new Book();
+        book.setTitle(request.getTitle());
+        book.setAuthor(author);
+        book.setGenre(genre);
+        book.setPrice(request.getPrice());
+        book.setCaption(request.getCaption());
+        book.setDescription(request.getDescription());
+        book.setIsbn(nvlBlankToNull(request.getIsbn()));
+        book.setPublishedYear(request.getPublishedYear());
+        book.setPublisher(request.getPublisher());
+        book.setPageCount(request.getPageCount());
+        book.setLanguage(request.getLanguage());
+        if (request.getStock() != null) {
+            book.setStock(request.getStock());
         }
-        b.setCoverImageUrl(req.getCoverImageUrl());
-        return b;
+        book.setCoverImageUrl(request.getCoverImageUrl());
+        return book;
     }
 
-    public static void updateEntity(Book target, BookRequest req, Author author, Genre genre) {
-        target.setTitle(req.getTitle());
+    public static void updateEntity(Book target, BookRequest updateRequest, Author author, Genre genre) {
+        target.setTitle(updateRequest.getTitle());
         target.setAuthor(author);
         target.setGenre(genre);
-        target.setPrice(req.getPrice());
+        target.setPrice(updateRequest.getPrice());
 
-        target.setCaption(req.getCaption());
-        target.setDescription(req.getDescription());
-        target.setIsbn(nvlBlankToNull(req.getIsbn()));
-        target.setPublishedYear(req.getPublishedYear());
-        target.setPublisher(req.getPublisher());
-        target.setPageCount(req.getPageCount());
-        target.setLanguage(req.getLanguage());
-        if (req.getStock() != null) {
-            target.setStock(req.getStock());
+        target.setCaption(updateRequest.getCaption());
+        target.setDescription(updateRequest.getDescription());
+        target.setIsbn(nvlBlankToNull(updateRequest.getIsbn()));
+        target.setPublishedYear(updateRequest.getPublishedYear());
+        target.setPublisher(updateRequest.getPublisher());
+        target.setPageCount(updateRequest.getPageCount());
+        target.setLanguage(updateRequest.getLanguage());
+        if (updateRequest.getStock() != null) {
+            target.setStock(updateRequest.getStock());
         }
-        target.setCoverImageUrl(req.getCoverImageUrl());
+        target.setCoverImageUrl(updateRequest.getCoverImageUrl());
     }
 
     private static String nvlBlankToNull(String s) {

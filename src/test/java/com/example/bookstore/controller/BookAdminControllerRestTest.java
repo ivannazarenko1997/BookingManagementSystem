@@ -1,6 +1,13 @@
 package com.example.bookstore.controller;
 
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.exception.BookStoreException;
 import com.example.bookstore.service.BookAdminService;
@@ -15,10 +22,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(BookAdminController.class)
@@ -250,7 +253,7 @@ class BookAdminControllerRestTest {
         long data = 9999L;
 
         Mockito.doThrow(new BookStoreException("Book not found: " + data))
-                .when(bookAdminService).delete(Mockito.eq(data));
+                .when(bookAdminService).delete(data);
 
         mockMvc.perform(delete(BASE_URL + "/9999"))
                 .andExpect(status().isInternalServerError());

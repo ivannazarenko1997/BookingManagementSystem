@@ -14,6 +14,7 @@ public class BookEventListener {
     private final BookSearchRepository searchRepository;
 
     public BookEventListener(BookSearchRepository searchRepository) {
+
         this.searchRepository = searchRepository;
     }
 
@@ -33,7 +34,8 @@ public class BookEventListener {
         final String type = safeLower(event.getType());
 
         switch (type) {
-            case "create", "update" -> handleUpsert(event);
+            case "create" -> handleInsert(event);
+            case "update" -> handleUpdate(event);
             case "delete" -> handleDelete(event);
             default -> {
                 IllegalArgumentException ex =
@@ -43,15 +45,29 @@ public class BookEventListener {
         }
     }
 
-    private void handleUpsert(BookEvent event) {
+    private void handleInsert(BookEvent event) {
         try {
             BookDocument doc = BookEventMapper.toDocument(event);
+
             searchRepository.save(doc);
-            log.info("Upserted book document id={} via event type={}", doc.getId(), event.getType());
+            log.info("Insert book document id={} via event type={}", doc.getId(), event.getType());
         } catch (Exception e) {
             log.error("Failed to upsert document for event id={}. Event={}", event.getId(), event, e);
         }
     }
+
+    private void handleUpdate(BookEvent event) {
+        try {
+            BookDocument doc = BookEventMapper.toDocument(event);
+            searchRepository.deleteById(doc.getId());
+            searchRepository.save(doc);
+
+            log.info("Update book document id={} via event type={}", doc.getId(), event.getType());
+        } catch (Exception e) {
+            log.error("Failed to upsert document for event id={}. Event={}", event.getId(), event, e);
+        }
+    }
+
 
     private void handleDelete(BookEvent event) {
         try {

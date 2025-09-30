@@ -1,5 +1,12 @@
 package com.example.bookstore.kafka.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -10,37 +17,34 @@ import com.example.bookstore.search.mapper.BookDocumentMapper;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.impl.BookSearchCustomServiceImpl;
 import com.example.bookstore.service.BookService;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class BookSearchCustomServiceImplTest {
 
     @org.mockito.Mock
     private ElasticsearchClient esClient;
-    @org.mockito.Mock
-    private MeterRegistry meterRegistry;
+
     @org.mockito.Mock
     private BookService bookService;
 
     @Test
     @DisplayName("POS: sort by price ASC with nulls last and ID tiebreak")
     void pos_sortsByPriceAscNullsLastWithIdTiebreak() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseWithTotal(List.of(3L, 1L, 2L), 3L);
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
@@ -65,7 +69,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("POS: sort by title ASC case-insensitive")
     void pos_sortsByTitleCaseInsensitive() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseWithTotal(List.of(1L, 2L, 3L), 3L);
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
@@ -89,7 +93,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("POS: unsorted preserves original (hydrated) order")
     void pos_unsortedPreservesOriginalOrder() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseWithTotal(List.of(5L, 2L, 9L), 3L);
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
@@ -113,7 +117,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("POS: uses totalHits from Elasticsearch when present")
     void pos_respectsTotalFromElasticsearch() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseWithTotal(List.of(1L, 2L), 42L);
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
@@ -137,7 +141,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("NEG: returns empty page when Elasticsearch client throws")
     void neg_returnsEmptyOnEsException() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
         when(esClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenThrow(new RuntimeException("es down"));
 
@@ -151,7 +155,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("NEG: returns empty page when BookService throws while hydrating")
     void neg_returnsEmptyOnBookServiceException() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         // Minimal ES response: only stubs hits().hits(); no total() to avoid unnecessary stubbing
         SearchResponse<BookDocument> esResponse = mockSearchResponseMinimal(List.of(10L, 20L));
@@ -170,7 +174,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("NEG: returns empty page when mapping toSearchItem throws")
     void neg_returnsEmptyWhenMapperThrows() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseMinimal(List.of(1L));
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
@@ -193,7 +197,7 @@ class BookSearchCustomServiceImplTest {
     @Test
     @DisplayName("NEG: unknown sort property is ignored (no crash, returns items)")
     void neg_unknownSortPropertyIgnored() throws Exception {
-        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService,meterRegistry);
+        BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
 
         SearchResponse<BookDocument> esResponse = mockSearchResponseWithTotal(List.of(4L, 1L, 3L), 3L);
         when(esClient.search(any(Function.class), eq(BookDocument.class))).thenReturn(esResponse);
