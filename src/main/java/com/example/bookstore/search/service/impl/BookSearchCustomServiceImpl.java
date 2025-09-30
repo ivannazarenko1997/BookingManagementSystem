@@ -36,12 +36,16 @@ import java.util.Objects;
 public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
     private static final String INDEX_NAME = "books";
+    private static final String TITLE = "title";
+    private static final String AUTHOR = "authorName";
+    private static final String GERNE = "genreName";
+    private static final String PRICE = "price";
+    private static final String ID = "id";
 
     private final ElasticsearchClient elasticsearchClient;
     private final BookService bookService;
     private final MeterRegistry meterRegistry;
-    private Counter createCounter;
-    private Counter updateCounter;
+
 
     public BookSearchCustomServiceImpl(ElasticsearchClient elasticsearchClient,
                                        BookService bookService,
@@ -59,7 +63,7 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
     @Timed(
             value = "books.search.timer",
             description = "Time to execute a book search",
-            extraTags = {"component", "service"}
+            extraTags = {"component", "booking-service"}
     )
     public Page<BookSearchItem> searchBooks(String queryText,
                                             String title,
@@ -71,13 +75,15 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
         try {
             Query query = buildSearchQuery(queryText, title, author, genre, minPrice, maxPrice);
             SearchResponse<BookDocument> response = executeSearch(query, pageable);
-
+System.out.println("response="+response.toString());
             List<BookDocument> documents = hydrateDocuments(response);
+            System.out.println("documents="+documents.toString());
             long totalHits = response.hits().total() != null
                     ? response.hits().total().value()
                     : documents.size();
 
             List<BookDocument> sorted = applySorting(documents, pageable.getSort());
+            System.out.println("sorted="+documents.toString());
             List<BookSearchItem> result = sorted.stream()
                     .map(BookDocumentMapper::toSearchItem)
                     .toList();
@@ -95,7 +101,7 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
                         .from(pageable.getPageNumber() * pageable.getPageSize())
                         .size(pageable.getPageSize())
                         .trackTotalHits(t -> t.enabled(true))
-                        .source(src -> src.filter(f -> f.includes("id")))
+                        .source(src -> src.filter(f -> f.includes(ID)))
                         .query(query),
                 BookDocument.class
         );
@@ -122,24 +128,24 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
         if (StringUtils.hasText(queryText)) {
             List<Query> should = new ArrayList<>();
-            should.add(Query.of(b -> b.match(createMatchQuery("title", queryText))));
-            should.add(Query.of(b -> b.match(createMatchQuery("authorName", queryText))));
-            should.add(Query.of(b -> b.match(createMatchQuery("genreName", queryText))));
+            should.add(Query.of(b -> b.match(createMatchQuery(TITLE, queryText))));
+            should.add(Query.of(b -> b.match(createMatchQuery(AUTHOR, queryText))));
+            should.add(Query.of(b -> b.match(createMatchQuery(GERNE, queryText))));
             bool.should(should).minimumShouldMatch("1");
         }
 
         if (StringUtils.hasText(title)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery("title", title))));
+            bool.must(Query.of(b -> b.match(createMatchQuery(TITLE, title))));
         }
         if (StringUtils.hasText(author)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery("authorName", author))));
+            bool.must(Query.of(b -> b.match(createMatchQuery(AUTHOR, author))));
         }
         if (StringUtils.hasText(genre)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery("genreName", genre))));
+            bool.must(Query.of(b -> b.match(createMatchQuery(GERNE, genre))));
         }
 
         if (minPrice != null || maxPrice != null) {
-            RangeQuery.Builder range = new RangeQuery.Builder().field("price");
+            RangeQuery.Builder range = new RangeQuery.Builder().field(PRICE);
             if (minPrice != null)
                 range.gte(JsonData.of(minPrice));
             if (maxPrice != null)
@@ -180,23 +186,23 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
             boolean ascending = order.isAscending();
 
             Comparator<BookDocument> next = switch (property) {
-                case "price" -> Comparator.comparing(
+                case PRICE -> Comparator.comparing(
                         BookDocument::getPrice,
                         Comparator.nullsLast(BigDecimal::compareTo)
                 );
-                case "title" -> Comparator.comparing(
+                case TITLE -> Comparator.comparing(
                         b -> safeLower(b.getTitle()),
                         Comparator.nullsLast(String::compareTo)
                 );
-                case "authorname" -> Comparator.comparing(
+                case AUTHOR -> Comparator.comparing(
                         b -> safeLower(b.getAuthorName()),
                         Comparator.nullsLast(String::compareTo)
                 );
-                case "genrename" -> Comparator.comparing(
+                case GERNE -> Comparator.comparing(
                         b -> safeLower(b.getGenreName()),
                         Comparator.nullsLast(String::compareTo)
                 );
-                case "id" -> Comparator.comparing(
+                case ID -> Comparator.comparing(
                         BookDocument::getId,
                         Comparator.nullsLast(Long::compareTo)
                 );

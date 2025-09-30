@@ -57,24 +57,25 @@ public class SearchReindexer implements ApplicationRunner {
         try {
             while (true) {
                 Page<BookIndexProjection> slice = bookService.findBooksForIndexing(PageRequest.of(page, batchSize));
-                if (slice.isEmpty())
-                    break;
+                if (!slice.isEmpty()) {
+                    List<BookDocument> docs = slice.getContent().stream().map(BookDocumentMapper::toDocument).toList();
+                    for (int i = 0; i < docs.size(); i++) {
+                        System.out.println("Doc " + i + ": " + docs.get(i).getId());
+                    }
+                    searchRepository.saveAll(docs);
 
-                List<BookDocument> docs = slice.getContent().stream().map(BookDocumentMapper::toDocument).toList();
-                for (int i = 0; i < docs.size(); i++) {
-                    System.out.println("Doc " + i + ": " + docs.get(i).getId());
+                    Iterable<BookDocument> list = searchRepository.findAll();
+                    for (BookDocument book : list) {
+                        System.out.println("book =" + book.toString()); // or access fields like book.getTitle()
+                    }
+                    totalIndexed += docs.size();
+
+                    log.info("Indexed batch page={} size={} (total={})", page, docs.size(), totalIndexed);
+
                 }
-                searchRepository.saveAll(docs);
-
-                Iterable<BookDocument> list = searchRepository.findAll();
-                for (BookDocument book : list) {
-                    System.out.println("book =" + book.toString()); // or access fields like book.getTitle()
-                }
-                totalIndexed += docs.size();
-
-                log.info("Indexed batch page={} size={} (total={})", page, docs.size(), totalIndexed);
-                if (!slice.hasNext())
+                if (!slice.hasNext()) {
                     break;
+                }
                 page++;
             }
             long took = System.currentTimeMillis() - start;

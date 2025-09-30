@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -61,25 +62,19 @@ public class BookServiceImpl implements BookService {
     }
 
     public List<Book> findBooksByIds(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
-        List<Book> books = bookRepository.findAllById(ids);
-        return (books != null && !books.isEmpty()) ? books : List.of();
+        return (!CollectionUtils.isEmpty(ids)) ?
+                bookRepository.findAllById(ids) : List.of();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<BookDocument> getDocumentsByIds(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
+        if (CollectionUtils.isEmpty(ids)) {
             return List.of();
         }
+         List<BookDocument> cachedDocuments = bookCache.getAllByIds(ids);
 
-        List<BookDocument> cachedDocuments = bookCache.getAllByIds(ids);
-        if (cachedDocuments == null) {
-            cachedDocuments = List.of();
-        }
-
+System.out.println("cachedDocuments="+cachedDocuments.toString());
         Set<Long> cachedIds = cachedDocuments.stream()
                 .filter(Objects::nonNull)
                 .map(BookDocument::getId)
@@ -90,14 +85,14 @@ public class BookServiceImpl implements BookService {
                 .filter(Objects::nonNull)
                 .filter(id -> !cachedIds.contains(id))
                 .toList();
-
+        System.out.println("missingIds="+missingIds.toString());
         List<Book> missingBooks = findBooksByIds(missingIds);
-
+        System.out.println("missingBooks="+missingBooks.toString());
         List<BookDocument> missingDocuments = missingBooks.stream()
                 .map(BookDocumentMapper::toDocument)
                 .filter(Objects::nonNull)
                 .toList();
-
+        System.out.println("missingDocuments="+missingDocuments.toString());
         if (!missingDocuments.isEmpty()) {
             bookCache.putAll(missingDocuments);
         }

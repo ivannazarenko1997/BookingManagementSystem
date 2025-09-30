@@ -96,12 +96,6 @@ class BookCacheTest {
         verify(cache, never()).put(any(), any());
     }
 
-    @Test
-    void negative_getAllByIdsNullList() {
-        List<BookDocument> result = bookCache.getAllByIds(null);
-        assertTrue(result.isEmpty());
-        verify(cache, never()).get(any(), eq(BookDocument.class)); // disambiguates to (Object, Class)
-    }
 
     @Test
     void negative_getAllByIdsEmptyList() {

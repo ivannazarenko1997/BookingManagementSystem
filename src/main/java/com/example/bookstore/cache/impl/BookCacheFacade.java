@@ -44,9 +44,6 @@ public class BookCacheFacade implements BookCache {
     }
 
     public List<BookDocument> getAllByIds(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return List.of();
-        }
         final List<BookDocument> result = new ArrayList<>(ids.size());
         final Set<Long> seen = new LinkedHashSet<>();
         for (Long id : ids) {

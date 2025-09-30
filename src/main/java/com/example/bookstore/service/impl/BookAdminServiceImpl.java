@@ -32,12 +32,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Service
 @Slf4j
 public class BookAdminServiceImpl implements BookAdminService {
-
+    private final MeterRegistry meterRegistry;
     private final BookService bookService;
     private final AuthorService authorService;
     private final GenreService genreService;
     private final BookEventPublisher bookEventPublisher;
-    private final MeterRegistry meterRegistry;
+
     private Counter createCounter;
     private Counter updateCounter;
     private Counter deleteCounter;
@@ -54,15 +54,15 @@ public class BookAdminServiceImpl implements BookAdminService {
 
         this.createCounter = Counter.builder("book.create.count")
                 .description("Number of books created")
-                .register(meterRegistry);
+                .register(this.meterRegistry);
 
         this.updateCounter = Counter.builder("book.update.count")
                 .description("Number of books updated")
-                .register(meterRegistry);
+                .register(this.meterRegistry);
 
         this.deleteCounter = Counter.builder("book.delete.count")
                 .description("Number of books deleted")
-                .register(meterRegistry);
+                .register(this.meterRegistry);
     }
     @Override
     public Page<BookResponse> list(BookFilter filter, Pageable pageable) {

@@ -115,3 +115,5 @@ curl -X POST 'http://localhost:8080/api/v1/books' \
 http://localhost:8080/actuator/metrics/book.create.count
 
 http://localhost:8080/actuator/metrics/books.search.timer
+
+http://localhost:9411/zipkin/?lookback=15m&endTs=1759250746743&limit=10
