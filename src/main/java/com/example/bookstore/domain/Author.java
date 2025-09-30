@@ -14,6 +14,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "authors", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

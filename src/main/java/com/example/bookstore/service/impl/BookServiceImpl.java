@@ -8,6 +8,7 @@ import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.search.mapper.BookDocumentMapper;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.service.BookService;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
+    @Timed(
+            value = "books.indexing.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "booking-service"}
+    )
     public Page<BookIndexProjection> findBooksForIndexing(Pageable pageable) {
         var page = bookRepository.findAllForIndexing(pageable);
         log.debug("Loaded {} projections (page {} of {}) for indexing",
@@ -41,6 +47,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Timed(
+            value = "books.findByIddb.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "booking-service"}
+    )
     public Book findById(Long id) {
         return bookRepository.findById(id)
                 .orElseThrow(() -> new BookStoreException("Book not found: " + id));
@@ -57,6 +68,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Timed(
+            value = "books.deletedb.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "booking-service"}
+    )
     public void delete(Book book) {
         bookRepository.delete(book);
     }
@@ -68,6 +84,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
+    @Timed(
+            value = "books.getDocumentsByIds.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "booking-service"}
+    )
     public List<BookDocument> getDocumentsByIds(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return List.of();

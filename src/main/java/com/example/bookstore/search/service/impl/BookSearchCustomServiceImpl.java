@@ -51,7 +51,6 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
     }
 
-
     @Override
     @Timed(
             value = "books.search.timer",
