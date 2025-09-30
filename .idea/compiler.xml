@@ -7,14 +7,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="openai-pgvector666666" />
         <module name="gilded-rose-spring" />
         <module name="gilded-rose-spring-v2" />
+        <module name="openai-pgvector666666" />
+        <module name="bookstore-inventory-v2" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="bookstore-inventory-v2" options="-parameters" />
       <module name="gilded-rose-spring" options="-parameters" />
       <module name="gilded-rose-spring-v2" options="-parameters" />
       <module name="openai-pgvector666666" options="-parameters" />
