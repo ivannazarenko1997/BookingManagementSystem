@@ -95,7 +95,6 @@ public class BookServiceImpl implements BookService {
         }
         List<BookDocument> cachedDocuments = bookCache.getAllByIds(ids);
 
-        System.out.println("cachedDocuments=" + cachedDocuments.toString());
         Set<Long> cachedIds = cachedDocuments.stream()
                 .filter(Objects::nonNull)
                 .map(BookDocument::getId)
