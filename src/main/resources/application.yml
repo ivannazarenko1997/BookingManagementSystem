@@ -103,7 +103,11 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+    enable:
+      all: true
   endpoint:
+    prometheus:
+      enabled: true
     health:
       show-details: always
 
