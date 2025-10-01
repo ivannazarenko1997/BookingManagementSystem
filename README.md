@@ -250,10 +250,140 @@ Traces are exported to Zipkin (default URL: http://localhost:9411/zipkin
 
 Each API request (e.g., creating a book or performing a search) will generate a trace ID and span IDs.
 
-You can visualize:
+Architecture Overview
+📌 Current Monolithic Architecture
 
-End-to-end request latency
+The Bookstore Inventory Management System is currently implemented as a monolithic Spring Boot application. All functionality is contained in a single codebase but logically separated into layers and packages.
 
-Breakdown of time spent in the database vs. Elasticsearch vs. controller layers
+🔹 Components
 
-Distributed call chains (useful if you later extend the system into microservices)
+Admin Controller
+
+Provides CRUD operations (create, update, delete, get) for Book, Author, and Genre.
+
+When a book is saved or updated:
+
+Data is persisted into PostgreSQL
+
+A corresponding event is sent to Kafka for asynchronous processing
+
+Kafka Integration
+
+The monolith includes a producer (Admin Service → Kafka)
+
+And a consumer (inside the same app) which listens to Kafka topics
+
+Messages represent book changes (BookCreated, BookUpdated, BookDeleted)
+
+Elasticsearch Synchronization
+
+Kafka consumer updates Elasticsearch indexes with the latest book data
+
+Ensures fast full-text search capability by title, author, genre, price
+
+User Service
+
+Exposes endpoints to search books using Elasticsearch
+
+Example:
+
+GET http://localhost:8080/api/v1/books?page=0&size=10&sort=price,asc&title=Domain-Driven Design
+
+
+Supports filters (title, author, genre, price) and sorting (by price, title, etc.)
+
+All additional book details (publisher, description, stock, etc.) are loaded from Redis cache for performance
+
+Database → Startup Sync
+
+On application startup, all book records from PostgreSQL are synchronized into Elasticsearch
+
+Ensures search index is always up-to-date, even if Kafka missed events
+
+🔹 Example Flow
+
+Admin adds a new book → record saved to PostgreSQL → event published to Kafka
+
+Kafka consumer processes the event → book indexed into Elasticsearch
+
+User performs a search → query served from Elasticsearch + details loaded from Redis cache
+
+📌 Future Microservices Architecture
+
+As the system grows, it can be refactored into independent microservices for scalability, maintainability, and fault isolation.
+
+🔹 Proposed Services
+
+Admin Service
+
+Handles CRUD operations (DB persistence only)
+
+Publishes events (BookCreated, BookUpdated, etc.) to Kafka
+
+No direct dependency on Elasticsearch
+
+Consumer Service
+
+Dedicated to listening to Kafka events
+
+Responsible for updating Elasticsearch indexes
+
+Ensures that the search layer remains decoupled from write operations
+
+Search Service
+
+Provides search API for end users
+
+Queries Elasticsearch for full-text search and filtering
+
+Enriches results with data from Redis cache
+
+Allows caching frequently requested books for faster response times
+
+🔹 Benefits of Microservices
+
+Scalability → Search service and consumer can scale independently
+
+Resilience → If Elasticsearch is down, CRUD operations (Admin Service) still work
+
+Performance → Redis caching ensures fast reads
+
+Maintainability → Clear separation of responsibilities between services
+
+Extensibility → Easy to add new services (e.g., Recommendation Engine, Analytics Service)
+
+🖼️ Current Data Flow (Monolith)
+flowchart TD
+A[Admin Controller] -->|Save/Update/Delete| B[(PostgreSQL DB)]
+A -->|Send Event| C[(Kafka Topic)]
+C --> D[Kafka Consumer]
+D -->|Index| E[(Elasticsearch)]
+E -->|Search Query| F[User Service]
+F -->|Load Details| G[(Redis Cache)]
+
+🖼️ Future Data Flow (Microservices)
+flowchart TD
+A[Admin Service] -->|Persist| B[(PostgreSQL DB)]
+A -->|Publish Event| C[(Kafka Topic)]
+
+    C --> D[Consumer Service]
+    D -->|Index Books| E[(Elasticsearch)]
+
+    F[User/Search Service] -->|Query| E
+    F -->|Load Details| G[(Redis Cache)]
+
+🔮 Roadmap
+
+Implement monolithic architecture with Admin + User services
+
+Integrate Kafka + Elasticsearch + Redis
+
+Extract Consumer Service into standalone microservice
+
+Extract Search Service into standalone microservice
+
+Deploy using Docker Compose → migrate to Kubernetes for scaling
+
+Add API Gateway + centralized authentication
+
+Add Monitoring dashboards with Prometheus + Grafana
