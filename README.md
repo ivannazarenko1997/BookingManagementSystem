@@ -632,3 +632,108 @@ Extract Search API next → monolith delegates search requests to Search Service
 Finally, extract Admin (CRUD) → monolith becomes a thin façade or is retired.
 
 Introduce API Gateway once services are separated.
+
+
+Cloud Deployment & Migration (AWS Ready)
+
+The Bookstore Inventory Management System can be deployed both on-premises (Docker/Kubernetes with PostgreSQL, Kafka, Elasticsearch, Redis) and in the cloud.
+When targeting AWS, the architecture can be adapted to leverage managed services for scalability, resilience, and reduced ops overhead.
+
+🔄 Service Mapping: On-Prem → AWS
+Current Component	AWS Replacement	Benefit
+PostgreSQL (RDS/Postgres container)	Amazon RDS (PostgreSQL)	Managed DB with backups, HA, auto-scaling storage
+Kafka	Amazon SQS (or Amazon MSK if strict Kafka needed)	Event bus decoupling services; SQS is simpler & serverless; MSK provides Kafka compatibility
+Elasticsearch	Amazon OpenSearch Service (AWS ELK)	Fully managed Elasticsearch/OpenSearch cluster; integrates with Kibana
+Redis Cache	Amazon ElastiCache (Redis)	Managed Redis cluster for caching & session storage
+Spring Security (Basic Auth)	Amazon Cognito	Federated identity, user pool management, JWT-based authentication & authorization
+Zipkin/Prometheus/Grafana	AWS X-Ray + CloudWatch + Managed Grafana	Distributed tracing & monitoring out of the box
+🔹 Example Cloud Architecture
+flowchart TB
+subgraph Client
+U[User / Admin]
+end
+
+    subgraph AWS
+      AGW[API Gateway]
+      COG[Amazon Cognito]
+      AS[Admin Service (ECS/EKS)]
+      SS[Search Service (ECS/EKS)]
+      CS[Consumer Service (ECS/EKS)]
+      RDS[(Amazon RDS Postgres)]
+      SQS[(Amazon SQS Queue)]
+      OS[(Amazon OpenSearch Service)]
+      REDIS[(Amazon ElastiCache Redis)]
+      XR[AWS X-Ray/CloudWatch]
+    end
+
+    U -->|HTTPS| AGW
+    AGW --> COG
+    AGW --> AS
+    AGW --> SS
+
+    AS --> RDS
+    AS --> SQS
+    CS --> SQS
+    CS --> OS
+    SS --> OS
+    SS --> REDIS
+
+    AS --> XR
+    SS --> XR
+    CS --> XR
+
+🔐 Authentication & Authorization (Cognito)
+
+Replace Basic Auth with JWT tokens issued by Amazon Cognito.
+
+Benefits:
+
+Supports user pools (staff, admins)
+
+MFA, SSO, and social login (Google, Facebook, etc.)
+
+Fine-grained role mapping (Admin → full CRUD, User → read-only)
+
+📡 Messaging (Kafka → SQS)
+
+Replace Kafka event publishing with Amazon SQS queues.
+
+Admin Service sends messages (BookCreated, BookUpdated, BookDeleted) to an SQS queue.
+
+Consumer Service reads from the queue and updates Amazon OpenSearch.
+
+If you require Kafka-specific features (ordered partitions, streams), you can migrate to Amazon MSK (Managed Kafka) instead.
+
+🔍 Search (Elasticsearch → OpenSearch)
+
+Replace Elasticsearch cluster with Amazon OpenSearch Service (ELK stack).
+
+Benefits:
+
+No cluster management (AWS manages scaling, snapshots, patching)
+
+Direct integration with CloudWatch for monitoring
+
+Kibana dashboards for log and search analytics
+
+⚡ Caching (Redis → ElastiCache)
+
+Replace self-hosted Redis with Amazon ElastiCache for Redis.
+
+Benefits:
+
+Managed replication & failover
+
+Auto-scaling
+
+Encryption in-transit and at-rest
+
+📊 Observability
+
+Replace Zipkin + Prometheus + Grafana with:
+
+AWS X-Ray → distributed tracing
+
+Amazon CloudWatch → metrics, logs, alarms
+
+Amazon Managed Grafana → dashboards
