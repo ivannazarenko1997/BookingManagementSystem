@@ -63,7 +63,8 @@ Docker / Docker Compose (containerization)
 Spring Actuator & Zipkin (monitoring & tracing)
 
 🚀 Getting Started
-1. Start PostgreSQL
+1. Start PostgreSQL,Kafka, Redis, Elascticsearch.
+    You can find yml file in docker-compose folder
    docker compose up -d db
 
 2. Run the Application
