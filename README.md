@@ -1,40 +1,68 @@
-ookstore Inventory Management System
+Bookstore Service
+
+Bookstore Inventory Management System
+
 🔎 Overview
 
-The Bookstore Inventory Management System is a RESTful web application designed to help bookstore owners efficiently manage their inventory. It provides a secure API for adding, updating, deleting, and searching books, with support for authentication, authorization, and search functionality.
+The Bookstore Inventory Management System is a RESTful web application designed to help bookstore owners efficiently manage their inventory.
 
-This project was implemented as a contractor-style assignment, simulating a real-world scenario of delivering a first production-ready version of the system for a customer. The focus is on clean design, extendability, and future maintainability.
+It provides a secure API for:
+
+Adding, updating, deleting, and searching books
+
+Role-based authentication & authorization
+
+Search functionality with Elasticsearch
+
+This project was implemented as a contractor-style assignment, simulating a real-world delivery of a first production-ready version for a customer. The focus is on clean design, extensibility, and maintainability.
 
 ✨ Key Features
 
 Book CRUD Operations (REST API)
 
-Add new books with details like title, author, genre, and price
+Add new books (title, author, genre, price, etc.)
 
 Update existing book information
 
-Delete books from the inventory
+Delete books from inventory
 
 Search Functionality
 
-Search for books by title, author, or genre
+Search by title, author, or genre
 
-Paginated search results for large inventories
+Paginated search results
 
 Authentication & Authorization
 
-Basic authentication for bookstore staff
+Basic authentication for staff
 
-Admins: Full CRUD access
+Admins → full CRUD access
 
-Users: Read-only access
+Users → read-only access
 
 Database Design
 
-PostgreSQL as the persistence layer
+PostgreSQL as persistence layer
 
-Entities: Book, Author, Genre with appropriate relationships
+Entities: Book, Author, Genre with relationships
 
+🛠 Tech Stack
+
+Java + Spring Boot
+
+PostgreSQL (data persistence)
+
+Elasticsearch (search engine)
+
+Flyway (database migrations)
+
+Spring Security (authentication & authorization)
+
+Docker / Docker Compose (containerization)
+
+Spring Actuator & Zipkin (monitoring & tracing)
+
+🚀 Getting Started
 1. Start PostgreSQL
    docker compose up -d db
 
@@ -53,19 +81,19 @@ mvn -q -DskipTests clean package && docker compose up --build
 
 Available Users:
 
-ADMIN → admin/admin123
+admin / admin123 → ADMIN role
 
-USER → user/user123
+user / user123 → USER role
 
 📖 API Documentation
 
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI → http://localhost:8080/swagger-ui.html
 
-Swagger Usage
+Usage
 
 Open Swagger UI
 
-Click the 🔒 Authorize button
+Click 🔒 Authorize
 
 Enter credentials:
 
@@ -73,18 +101,13 @@ Username: admin
 Password: admin123
 
 
-Try endpoints — POST/PUT/DELETE require ADMIN role.
+Try endpoints → POST / PUT / DELETE require ADMIN
 
 📡 API Examples
-cURL (HTTP Basic)
-
 List Books
-
 curl -u admin:admin123 "http://localhost:8080/api/v1/books?page=0&size=5&sort=title,asc"
 
-
 Create a Book
-
 curl -u admin:admin123 -H "Content-Type: application/json" -X POST \
 -d '{
 "title": "Domain-Driven Design",
@@ -94,9 +117,7 @@ curl -u admin:admin123 -H "Content-Type: application/json" -X POST \
 }' \
 http://localhost:8080/api/v1/books
 
-
 Update a Book
-
 curl -u admin:admin123 -H "Content-Type: application/json" -X PUT \
 -d '{
 "title": "Domain-Driven Design (Updated)",
@@ -106,14 +127,10 @@ curl -u admin:admin123 -H "Content-Type: application/json" -X PUT \
 }' \
 http://localhost:8080/api/v1/books/1
 
-
 Delete a Book
-
 curl -u admin:admin123 -X DELETE http://localhost:8080/api/v1/books/1
 
-
 Search via Elasticsearch
-
 curl -u admin:admin123 "http://localhost:8080/api/v1/search/books?q=clean&page=0&size=10"
 
 Raw HTTP Header Example
@@ -121,8 +138,6 @@ Authorization: Basic YWRtaW46YWRtaW4xMjM=
 
 
 (Base64 of admin:admin123)
-
-Example:
 
 curl -H "Authorization: Basic YWRtaW46YWRtaW4xMjM=" http://localhost:8080/api/v1/books
 
@@ -133,9 +148,7 @@ mvn -Dflyway.url=jdbc:postgresql://localhost:5432/bookstore \
 flyway:repair flyway:migrate
 
 🧪 Advanced Book API Examples
-
 Extended Create
-
 curl -X POST 'http://localhost:8080/api/v1/books' \
 -u admin:admin123 \
 -H 'Content-Type: application/json' \
@@ -155,9 +168,7 @@ curl -X POST 'http://localhost:8080/api/v1/books' \
 "coverImageUrl": "https://example.com/ddd.jpg"
 }'
 
-
 Extended Update
-
 curl -X PUT 'http://localhost:8080/api/v1/books/9' \
 -u admin:admin123 \
 -H 'Content-Type: application/json' \
