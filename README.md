@@ -78,6 +78,26 @@ Containerized Build
 
 mvn -q -DskipTests clean package && docker compose up --build
 
+Steps on Windows
+
+Open Command Prompt:
+
+Press Win + R, type cmd, then hit Enter.
+
+Navigate to the target folder (optional, but makes the command shorter):
+
+cd C:\sendai\booking-management-system-v2\target
+
+
+Run the JAR file:
+
+java -jar bookstore-inventory-0.1.0.jar
+
+
+Or, if you want to run it directly with the full path:
+
+java -jar C:\sendai\booking-management-system-v2\target\bookstore-inventory-0.1.0.jar
+
 🔐 Authentication
 
 Available Users:
