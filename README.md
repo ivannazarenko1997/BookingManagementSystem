@@ -764,5 +764,43 @@ Screens of work results added to following directory
 https://github.com/ivannazarenko1997/BookingManagementSystem/tree/main/docs/screens
 
  
+ 
+MONOLIT DESIGN
+![Monolit_Design Screen](docs/screens/monolit_design.png)
 
+
+MICROSERVISE SYSTEM DESIGN
+![Microservice_Design Screen](docs/screens/future_microservice_system_design_project.png)
+
+
+AWS SYSTEM DESIGN
+![Microservice_Design Screen](docs/screens/future_aws_system_design.png)
+
+GRUD OPERATIONS
+![Create_Book Screen](docs/screens/createBookPostman.png)
+![Update_Book Screen](docs/screens/book_update_postman.png)
+
+
+ZIPKIN
+![Actuator_Design Screen](docs/screens/zipkin_trace_history.png)
+ 
+ACTUATOR
+![Actuator_Design Screen](docs/screens/book_create_count_actuator.png)
+![Actuator_Design Screen](docs/screens/book_delete_time_actuator.png)
+![Actuator_Design Screen](docs/screens/book_search_time_actuator.png)
+![Actuator_Design Screen](docs/screens/book_update_time_actuator.png)
+ 
+KAFKA
+![kafka Screen](docs/screens/kafka_ui.png)
+![kafka Screen](docs/screens/kafka_ui_events.png)
+
+
+ELASTICTICSEARCH
 ![ElasticSearch Screen](docs/screens/elasticsearch_data.png)
+![ElasticSearch Screen](docs/screens/elasticsearch_cluster.png)
+![ElasticSearch Screen](docs/screens/elasticsearch_cluster_info.png)
+![ElasticSearch Screen](docs/screens/elasticsearch_index.png)
+
+
+TESTS
+![kafka Screen](docs/screens/tests_green.png)
