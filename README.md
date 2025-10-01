@@ -779,7 +779,15 @@ AWS SYSTEM DESIGN
 GRUD OPERATIONS
 ![Create_Book Screen](docs/screens/createBookPostman.png)
 ![Update_Book Screen](docs/screens/book_update_postman.png)
+![Get_Book Screen](docs/screens/getBookPostman.png)
+![Delete_Book Screen](docs/screens/deleteBookPostman.png)
+![Find_Filter_sort_Book Screen](docs/screens/find_filter_sort_BookPostman.png)
 
+DATABASE_TABLES
+![DB_table_authors](docs/screens/database_table_authors_postgres_ui.png)
+![DB_table_books](docs/screens/database_table_books_postgres_ui.png)
+![DB_table_genres](docs/screens/database_table_genres_postgres_ui.png)
+![DB_tables_all](docs/screens/database_tables_postgres_ui.png)
 
 ZIPKIN
 ![Actuator_Design Screen](docs/screens/zipkin_trace_history.png)
