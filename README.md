@@ -738,3 +738,7 @@ AWS X-Ray → distributed tracing
 Amazon CloudWatch → metrics, logs, alarms
 
 Amazon Managed Grafana → dashboards
+
+
+Screens of work results added to following directory  
+https://github.com/ivannazarenko1997/BookingManagementSystem/tree/main/docs/screens
