@@ -791,7 +791,8 @@ DATABASE_TABLES
 
 ZIPKIN
 ![Actuator_Design Screen](docs/screens/zipkin_trace_history.png)
- 
+![Actuator_Design Screen](docs/screens/zipkin_trace_info.png)
+
 ACTUATOR
 ![Actuator_Design Screen](docs/screens/book_create_count_actuator.png)
 ![Actuator_Design Screen](docs/screens/book_delete_time_actuator.png)
