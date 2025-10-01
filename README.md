@@ -387,3 +387,248 @@ Deploy using Docker Compose → migrate to Kubernetes for scaling
 Add API Gateway + centralized authentication
 
 Add Monitoring dashboards with Prometheus + Grafana
+
+
+Future Architecture (System Design)
+
+The monolith evolves into three independently scalable services with a message-driven backbone and read-optimized search.
+
+1) High-Level Service Topology
+   flowchart LR
+   subgraph Client
+   U[Users / Admins]
+   end
+
+   U -->|HTTPS/JSON| G[API Gateway / Ingress]
+
+   subgraph ControlPlane[Observability & Ops]
+   ZP[Zipkin/Tempo]
+   PR[Prometheus]
+   GF[Grafana]
+   LG[Log Aggregation]
+   end
+
+   subgraph DataPlane[Core Platform]
+   subgraph Writes
+   AS[Admin Service]
+   PG[(PostgreSQL)]
+   K[(Kafka)]
+   CS[Consumer Service]
+   ES[(Elasticsearch)]
+   end
+
+   subgraph Reads
+   SS[Search Service]
+   R[(Redis Cache)]
+   end
+   end
+
+   %% Requests
+   G --> AS
+   AS --> PG
+   AS -->|Book events| K
+   K --> CS
+   CS -->|Index| ES
+
+   %% Search path
+   G --> SS
+   SS --> ES
+   SS <--> R
+
+   %% Telemetry
+   AS --> ZP
+   SS --> ZP
+   CS --> ZP
+   AS --> PR
+   SS --> PR
+   CS --> PR
+   AS --> LG
+   SS --> LG
+   CS --> LG
+
+
+Key ideas
+
+Admin Service owns writes to PostgreSQL and publishes domain events to Kafka.
+
+Consumer Service materializes search views in Elasticsearch from Kafka events.
+
+Search Service serves read queries from Elasticsearch and enriches / caches hot data in Redis.
+
+API Gateway centralizes routing, rate limiting, and authN/Z (can be Spring Cloud Gateway, NGINX, Traefik, or Kong).
+
+2) Core Request Flows (Sequence)
+   2.1 Book Create/Update (Write Path)
+   sequenceDiagram
+   actor Admin
+   participant GW as API Gateway
+   participant AS as Admin Service
+   participant PG as PostgreSQL
+   participant K as Kafka
+   participant CS as Consumer Service
+   participant ES as Elasticsearch
+
+   Admin->>GW: POST /api/admin/books
+   GW->>AS: Forward
+   AS->>PG: upsert(Book)
+   PG-->>AS: ok (id, version)
+   AS->>K: publish(BookCreated/Updated)
+   K-->>CS: event(Book...)
+   CS->>ES: index(bookDocument)
+   ES-->>CS: ack
+   AS-->>GW: 201 Created (bookId)
+   GW-->>Admin: 201 Created
+
+2.2 Search (Read Path)
+sequenceDiagram
+actor User
+participant GW as API Gateway
+participant SS as Search Service
+participant ES as Elasticsearch
+participant R as Redis
+
+    User->>GW: GET /api/search/books?title=...&sort=price,asc
+    GW->>SS: Forward
+    SS->>ES: query(title/author/genre/price + pagination/sort)
+    ES-->>SS: hits(ids + lightweight fields)
+    SS->>R: MGET(details by ids)
+    R-->>SS: cached subset
+    SS->>AS: (optional) fallback to DB for missing enrich fields (if needed)
+    SS-->>GW: 200 OK (results)
+    GW-->>User: 200 OK
+
+3) Data Ownership & Contracts
+
+PostgreSQL is the system of record (normalized entities: Book, Author, Genre).
+
+Elasticsearch stores denormalized documents optimized for search & sorting.
+
+Kafka carries immutable domain events (BookCreated, BookUpdated, BookDeleted)—the contract between write and read sides.
+
+Redis caches search results and/or book details by ID (TTL + cache invalidation on events).
+
+4) Deployment Sketch (Kubernetes-Friendly)
+   flowchart TB
+   subgraph Edge
+   LB[External Load Balancer]
+   end
+
+   subgraph K8sCluster[Kubernetes]
+   IG[Ingress / API Gateway]
+   AS[Admin Service (Deployment)]
+   SS[Search Service (Deployment)]
+   CS[Consumer Service (Deployment)]
+
+   subgraph DataStores
+   PG[(PostgreSQL StatefulSet)]
+   ES[(Elasticsearch StatefulSet / Cluster)]
+   K[(Kafka StatefulSet)]
+   R[(Redis StatefulSet)]
+   end
+
+   subgraph Observability
+   PR[Prometheus]
+   GF[Grafana]
+   ZP[Zipkin/Tempo]
+   LG[Log Collector (Fluent Bit/Vector)]
+   end
+   end
+
+   LB --> IG
+   IG --> AS
+   IG --> SS
+
+   AS --> PG
+   AS --> K
+   CS --> K
+   CS --> ES
+
+   SS --> ES
+   SS --> R
+
+   AS --> PR
+   SS --> PR
+   CS --> PR
+   AS --> ZP
+   SS --> ZP
+   CS --> ZP
+   AS --> LG
+   SS --> LG
+   CS --> LG
+
+5) Scaling & Reliability
+
+Scale reads by horizontally scaling Search Service and Elasticsearch.
+
+Scale writes by scaling Admin Service; Kafka absorbs bursts with backpressure.
+
+Eventual consistency between PostgreSQL and Elasticsearch; consumers retry with idempotent indexing (use doc _id = book id).
+
+Resilience
+
+Outages in Elasticsearch do not block writes.
+
+Dead-letter topic for poison events.
+
+Circuit breakers & timeouts around ES/Redis.
+
+6) Caching Strategy
+
+Redis
+
+BOOK:{id} → book details for result enrichment
+
+SEARCH:{normalizedQueryHash} → paginated results (short TTL)
+
+Invalidation
+
+On BookUpdated/Deleted, publish cache invalidation messages (or use cache-aside + versioning).
+
+7) Contracts & Schema (event-driven)
+
+BookEvent (example)
+
+{
+"eventType": "BOOK_UPDATED",
+"occurredAt": "2025-10-01T09:00:00Z",
+"payload": {
+"id": 9,
+"title": "Domain-Driven Design",
+"authorId": 2,
+"authorName": "Eric Evans",
+"genreId": 1,
+"genreName": "Software",
+"price": 59.99,
+"isbn": "978-0321125217",
+"stock": 12,
+"publisher": "Addison-Wesley",
+"publishedYear": 2003,
+"language": "en"
+},
+"version": 3
+}
+
+
+Use schema registry (e.g., Confluent/Redpanda) to evolve fields safely.
+
+Consumers are forward/backward compatible.
+
+8) Security & Access
+
+API Gateway enforces AuthN/Z (e.g., Basic now → JWT/OAuth2 later).
+
+Admin Service: ADMIN-only routes to mutate data.
+
+Search Service: public or authenticated read (rate-limited).
+
+Network policies to restrict direct access to datastores.
+
+9) Migration Path from Monolith
+
+Extract Consumer first (lowest coupling) → point to monolith’s Kafka.
+
+Extract Search API next → monolith delegates search requests to Search Service.
+
+Finally, extract Admin (CRUD) → monolith becomes a thin façade or is retired.
+
+Introduce API Gateway once services are separated.
