@@ -765,4 +765,4 @@ https://github.com/ivannazarenko1997/BookingManagementSystem/tree/main/docs/scre
 
  
 
-![ElasticSearch Screen](docs\screens\elasticsearch_data.png)
+![ElasticSearch Screen](docs/screens/elasticsearch_data.png)
