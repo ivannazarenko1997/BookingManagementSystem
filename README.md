@@ -762,3 +762,7 @@ Amazon Managed Grafana → dashboards
 
 Screens of work results added to following directory  
 https://github.com/ivannazarenko1997/BookingManagementSystem/tree/main/docs/screens
+
+
+
+![ElasticSearch Screen](docs/screen/elasticsearch_data.png)
