@@ -803,4 +803,4 @@ ELASTICTICSEARCH
 
 
 TESTS
-![kafka Screen](docs/screens/tests_green.png)
+![Tests Screen](docs/screens/tests_green.png)
