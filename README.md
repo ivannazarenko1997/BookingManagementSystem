@@ -188,14 +188,72 @@ curl -X PUT 'http://localhost:8080/api/v1/books/9' \
 "coverImageUrl": "https://example.com/ddd-v2.jpg"
 }'
 
-📊 Monitoring & Tracing
+📊 Monitoring & Observability
 
-Actuator Metrics
+The Bookstore Service is instrumented with Spring Boot Actuator and Micrometer. This enables developers to inspect runtime metrics, timers, and integrate with distributed tracing systems such as Zipkin.
 
-Book Create Counter
+🔢 Actuator Metrics
+
+Book Creation Counter
+Endpoint: http://localhost:8080/actuator/metrics/book.create.count
+
+This metric tracks the number of books created via the API.
+
+Response includes:
+
+The total count of created books since the application started
+
+Optional tags (if configured, e.g., by user/role)
+
+Example response (JSON):
+
+{
+"name": "book.create.count",
+"measurements": [
+{ "statistic": "COUNT", "value": 5.0 }
+],
+"availableTags": []
+}
+
 
 Book Search Timer
+Endpoint: http://localhost:8080/actuator/metrics/books.search.timer
 
-Zipkin Tracing
+This metric measures the time spent searching for books.
 
-http://localhost:9411/zipkin
+Useful for performance monitoring of Elasticsearch queries or repository lookups.
+
+Response includes:
+
+COUNT: how many times the search endpoint has been called
+
+TOTAL_TIME: cumulative execution time (in seconds)
+
+MAX: maximum time observed for a single search
+
+Example response (JSON):
+
+{
+"name": "books.search.timer",
+"measurements": [
+{ "statistic": "COUNT", "value": 12.0 },
+{ "statistic": "TOTAL_TIME", "value": 4.182 },
+{ "statistic": "MAX", "value": 0.792 }
+],
+"availableTags": []
+}
+
+🔍 Distributed Tracing with Zipkin
+
+Traces are exported to Zipkin (default URL: http://localhost:9411/zipkin
+)
+
+Each API request (e.g., creating a book or performing a search) will generate a trace ID and span IDs.
+
+You can visualize:
+
+End-to-end request latency
+
+Breakdown of time spent in the database vs. Elasticsearch vs. controller layers
+
+Distributed call chains (useful if you later extend the system into microservices)
