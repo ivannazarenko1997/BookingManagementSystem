@@ -128,6 +128,10 @@ Try endpoints → POST / PUT / DELETE require ADMIN
 List Books
 curl -u admin:admin123 "http://localhost:8080/api/v1/books?page=0&size=5&sort=title,asc"
 
+filtering and sorting commands:
+curl -u admin:admin123 "http://localhost:8080/api/v1/books?page=0&size=50&sort=price,asc"
+curl -u admin:admin123 "http://localhost:8080/api/v1/books?page=0&size=5&sort=price,desc&title=Domain-Driven Design"
+
 Create a Book
 curl -u admin:admin123 -H "Content-Type: application/json" -X POST \
 -d '{
@@ -763,8 +767,7 @@ Amazon Managed Grafana → dashboards
 Screens of work results added to following directory  
 https://github.com/ivannazarenko1997/BookingManagementSystem/tree/main/docs/screens
 
- 
- 
+
 MONOLIT DESIGN
 ![Monolit_Design Screen](docs/screens/monolit_design.png)
 
