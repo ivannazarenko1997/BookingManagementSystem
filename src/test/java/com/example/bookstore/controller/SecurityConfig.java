@@ -40,23 +40,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        var admin = User.withUsername("admin")
-                .password(encoder.encode("admin123"))
-                .roles("ADMIN", "USER")
-                .build();
-
-        var user = User.withUsername("user")
-                .password(encoder.encode("user123"))
-                .roles("USER")
-                .build();
-
-        var guest = User.withUsername("guest")
-                .password(encoder.encode("guest123"))
-                .roles("GUEST")
-                .build();
-
-        return new InMemoryUserDetailsManager(admin, user, guest);
-    }
 }

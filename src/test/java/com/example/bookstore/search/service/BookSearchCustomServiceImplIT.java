@@ -8,12 +8,14 @@ import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
 import co.elastic.clients.util.ObjectBuilder;
+import com.example.bookstore.dto.BookSearchDto;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.impl.BookSearchCustomServiceImpl;
 import com.example.bookstore.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration;
@@ -103,8 +105,10 @@ class BookSearchCustomServiceImplIT {
                 .thenReturn(List.of(bookDocument1, bookDocument2, bookDocument3));
 
         PageRequest pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("price")));
-        Page<BookSearchItem> searchResult = bookSearchService.searchBooks(
-                null, null, null, null, null, null, pageable);
+      //  Mockito.any()
+        BookSearchDto filters = BookSearchDto.builder().q(null)
+                .order(null).genre(null).title(null).minPrice(null).maxPrice(null).build();
+        Page<BookSearchItem> searchResult = bookSearchService.searchBooks(filters, pageable);
 
         assertThat(searchResult.getContent())
                 .extracting(BookSearchItem::getId)
@@ -132,8 +136,10 @@ class BookSearchCustomServiceImplIT {
                 Sort.Order.desc("title"),
                 Sort.Order.asc("id")
         ));
+        BookSearchDto filters = BookSearchDto.builder().q(null)
+                .order(null).genre(null).title(null).minPrice(null).maxPrice(null).build();
         Page<BookSearchItem> searchResult = bookSearchService.searchBooks(
-                null, null, null, null, null, null, pageable);
+                filters, pageable);
 
 
         assertThat(searchResult.getContent())
@@ -148,9 +154,10 @@ class BookSearchCustomServiceImplIT {
         when(elasticsearchClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenReturn(esResponse);
 
-
+        BookSearchDto filters = BookSearchDto.builder().q("anything")
+                .order(null).genre(null).title(null).minPrice(null).maxPrice(null).build();
         Page<BookSearchItem> searchResult = bookSearchService.searchBooks(
-                "anything", null, null, null, null, null, PageRequest.of(0, 5));
+                filters, PageRequest.of(0, 5));
 
 
         assertThat(searchResult.getTotalElements()).isZero();
@@ -164,11 +171,10 @@ class BookSearchCustomServiceImplIT {
         when(elasticsearchClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenThrow(new RuntimeException("ES down"));
 
-
+        BookSearchDto filters = BookSearchDto.builder().q("q")
+                . genre("a").title("t").minPrice(new BigDecimal("5")).maxPrice(new BigDecimal("50")).build();
         Page<BookSearchItem> searchResult = bookSearchService.searchBooks(
-                "q", "t", "a", "g", new BigDecimal("5"), new BigDecimal("50"),
-                PageRequest.of(0, 10));
-
+                filters, PageRequest.of(0, 10));
 
         assertThat(searchResult.getTotalElements()).isZero();
         assertThat(searchResult.getContent()).isEmpty();
@@ -184,8 +190,10 @@ class BookSearchCustomServiceImplIT {
 
 
         PageRequest pageable = PageRequest.of(2, 5, Sort.by(Sort.Order.asc("price")));
-        bookSearchService.searchBooks("wizard", "Harry", "Rowling", "Fantasy",
-                new BigDecimal("10"), new BigDecimal("40"), pageable);
+
+        BookSearchDto filters = BookSearchDto.builder().q("wizard")
+                . genre("Rowling").title("Fantasy").minPrice(new BigDecimal("10")).maxPrice(new BigDecimal("40")).build();
+        bookSearchService.searchBooks(filters, pageable);
 
 
         @SuppressWarnings("unchecked")

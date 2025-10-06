@@ -12,6 +12,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
+import com.example.bookstore.dto.BookSearchDto;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.mapper.BookDocumentMapper;
 import com.example.bookstore.search.model.BookDocument;
@@ -57,9 +58,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenAnswer(inv -> toItem((BookDocument) inv.getArgument(0)));
-
+            BookSearchDto filters = BookSearchDto.builder() .build();
             Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("price")));
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getTotalElements()).isEqualTo(3);
             assertThat(page.getContent()).extracting("id").containsExactly(1L, 3L, 2L);
@@ -82,9 +83,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenAnswer(inv -> toItem((BookDocument) inv.getArgument(0)));
-
+            BookSearchDto filters = BookSearchDto.builder() .build();
             Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("title")));
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getContent()).extracting("id").containsExactly(2L, 1L, 3L);
         }
@@ -106,9 +107,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenAnswer(inv -> toItem((BookDocument) inv.getArgument(0)));
-
+            BookSearchDto filters = BookSearchDto.builder().build();
             Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getContent()).extracting("id").containsExactly(5L, 2L, 9L);
         }
@@ -129,9 +130,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenAnswer(inv -> toItem((BookDocument) inv.getArgument(0)));
-
+            BookSearchDto filters = BookSearchDto.builder().build();
             Pageable pageable = PageRequest.of(0, 2, Sort.unsorted());
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getTotalElements()).isEqualTo(42);
             assertThat(page.getContent()).hasSize(2);
@@ -144,9 +145,9 @@ class BookSearchCustomServiceImplTest {
         BookSearchCustomServiceImpl service = new BookSearchCustomServiceImpl(esClient, bookService);
         when(esClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenThrow(new RuntimeException("es down"));
-
+        BookSearchDto filters = BookSearchDto.builder().build();
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+        Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
         assertThat(page.getTotalElements()).isZero();
         assertThat(page.getContent()).isEmpty();
@@ -163,9 +164,9 @@ class BookSearchCustomServiceImplTest {
 
         when(bookService.getDocumentsByIds(List.of(10L, 20L)))
                 .thenThrow(new RuntimeException("db down"));
-
+        BookSearchDto filters = BookSearchDto.builder().build();
         Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+        Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
         assertThat(page.getTotalElements()).isZero();
         assertThat(page.getContent()).isEmpty();
@@ -185,9 +186,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenThrow(new RuntimeException("mapper fail"));
-
+            BookSearchDto filters = BookSearchDto.builder().build();
             Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getTotalElements()).isZero();
             assertThat(page.getContent()).isEmpty();
@@ -210,9 +211,9 @@ class BookSearchCustomServiceImplTest {
         try (MockedStatic<BookDocumentMapper> mocked = mockStatic(BookDocumentMapper.class)) {
             mocked.when(() -> BookDocumentMapper.toSearchItem(any(BookDocument.class)))
                     .thenAnswer(inv -> toItem((BookDocument) inv.getArgument(0)));
-
+            BookSearchDto filters = BookSearchDto.builder().build();
             Pageable pageable = PageRequest.of(0, 10, Sort.by("unknownProp"));
-            Page<BookSearchItem> page = service.searchBooks(null, null, null, null, null, null, pageable);
+            Page<BookSearchItem> page = service.searchBooks(filters, pageable);
 
             assertThat(page.getContent()).extracting("id").containsExactly(4L, 1L, 3L);
         }

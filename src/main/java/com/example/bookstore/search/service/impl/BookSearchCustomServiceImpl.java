@@ -1,5 +1,12 @@
 package com.example.bookstore.search.service.impl;
 
+import static com.example.bookstore.service.specification.BookSpecsDb.fullText;
+import static com.example.bookstore.service.specification.BookSpecsDb.likeAuthor;
+import static com.example.bookstore.service.specification.BookSpecsDb.likeGenre;
+import static com.example.bookstore.service.specification.BookSpecsDb.likeTitle;
+import static com.example.bookstore.service.specification.BookSpecsDb.priceGte;
+import static com.example.bookstore.service.specification.BookSpecsDb.priceLte;
+
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
@@ -8,6 +15,10 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
+import com.example.bookstore.domain.Book;
+import com.example.bookstore.dto.BookResponse;
+import com.example.bookstore.dto.BookSearchDto;
+import com.example.bookstore.mappers.BookMapper;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.mapper.BookDocumentMapper;
 import com.example.bookstore.search.model.BookDocument;
@@ -17,9 +28,12 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -53,19 +67,14 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
     @Override
     @Timed(
-            value = "books.search.timer",
+            value = "books.search.es.timer",
             description = "Time to execute a book search",
             extraTags = {"component", "booking-service"}
     )
-    public Page<BookSearchItem> searchBooks(String queryText,
-                                            String title,
-                                            String author,
-                                            String genre,
-                                            BigDecimal minPrice,
-                                            BigDecimal maxPrice,
+    public Page<BookSearchItem> searchBooks(BookSearchDto filters,
                                             Pageable pageable) {
         try {
-            Query query = buildSearchQuery(queryText, title, author, genre, minPrice, maxPrice);
+            Query query = buildSearchQuery(filters);
             SearchResponse<BookDocument> response = executeSearch(query, pageable);
             List<BookDocument> documents = hydrateDocuments(response);
             long totalHits = response.hits().total() != null
@@ -79,7 +88,39 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
             return new PageImpl<>(result, pageable, totalHits);
         } catch (Exception ex) {
-            log.error("Search failed", ex);
+            log.error("Search books in elasticSearch failed", ex);
+            return new PageImpl<>(List.of(), pageable, 0);
+        }
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    @Timed(
+            value = "books.search.db.timer",
+            description = "Time to execute a book search",
+            extraTags = {"component", "booking-service"}
+    )
+    public Page<BookResponse> searchDb(
+            BookSearchDto dto, Pageable pageable) {
+        try {
+            Specification<Book> spec = Specification.<Book>where(null)
+                    .and(likeTitle(dto.getTitle()))
+                    .and(likeAuthor(dto.getAuthor()))
+                    .and(likeGenre(dto.getGenre()))
+                    .and(fullText(dto.getQ()))
+                    .and(priceGte(dto.getMinPrice()))
+                    .and(priceLte(dto.getMaxPrice()));
+
+            if (StringUtils.hasText(dto.getOrder())) {
+                Sort.Direction dir = "desc".equalsIgnoreCase(dto.getOrder()) ? Sort.Direction.DESC : Sort.Direction.ASC;
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(dir, "price"));
+            }
+
+            return bookService.findAll(pageable,spec)
+                    .map(BookMapper::toDto);
+        } catch (Exception ex) {
+            log.error("Search books in DB failed", ex);
             return new PageImpl<>(List.of(), pageable, 0);
         }
     }
@@ -111,42 +152,46 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
         return ids.isEmpty() ? List.of() : bookService.getDocumentsByIds(ids);
     }
 
-    private Query buildSearchQuery(String queryText,
-                                   String title,
-                                   String author,
-                                   String genre,
-                                   BigDecimal minPrice,
-                                   BigDecimal maxPrice) {
+    private Query buildSearchQuery(BookSearchDto filters) {
         BoolQuery.Builder bool = new BoolQuery.Builder();
 
-        if (StringUtils.hasText(queryText)) {
+        if (isExists(filters.getQ())) {
             List<Query> should = new ArrayList<>();
-            should.add(Query.of(b -> b.match(createMatchQuery(TITLE, queryText))));
-            should.add(Query.of(b -> b.match(createMatchQuery(AUTHOR, queryText))));
-            should.add(Query.of(b -> b.match(createMatchQuery(GERNE, queryText))));
+            should.add(Query.of(b -> b.match(createMatchQuery(TITLE, filters.getQ()))));
+            should.add(Query.of(b -> b.match(createMatchQuery(AUTHOR, filters.getQ()))));
+            should.add(Query.of(b -> b.match(createMatchQuery(GERNE, filters.getQ()))));
             bool.should(should).minimumShouldMatch("1");
         }
 
-        if (StringUtils.hasText(title)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery(TITLE, title))));
+        if (isExists(filters.getTitle())) {
+            bool.must(Query.of(b -> b.match(createMatchQuery(TITLE, filters.getTitle()))));
         }
-        if (StringUtils.hasText(author)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery(AUTHOR, author))));
+        if (isExists(filters.getAuthor())) {
+            bool.must(Query.of(b -> b.match(createMatchQuery(AUTHOR, filters.getAuthor()))));
         }
-        if (StringUtils.hasText(genre)) {
-            bool.must(Query.of(b -> b.match(createMatchQuery(GERNE, genre))));
+        if (isExists(filters.getGenre())) {
+            bool.must(Query.of(b -> b.match(createMatchQuery(GERNE, filters.getGenre()))));
         }
 
-        if (minPrice != null || maxPrice != null) {
+        if (isExists(filters.getMinPrice())|| isExists(filters.getMaxPrice())) {
             RangeQuery.Builder range = new RangeQuery.Builder().field(PRICE);
-            if (minPrice != null)
-                range.gte(JsonData.of(minPrice));
-            if (maxPrice != null)
-                range.lte(JsonData.of(maxPrice));
+            if (filters.getMinPrice() != null) {
+                range.gte(JsonData.of(filters.getMinPrice()));
+            }
+            if (filters.getMaxPrice() != null) {
+                range.lte(JsonData.of(filters.getMaxPrice()));
+            }
             bool.must(Query.of(b -> b.range(range.build())));
         }
 
         return Query.of(qb -> qb.bool(bool.build()));
+    }
+    public static boolean isExists(String check) {
+        return StringUtils.hasText(check);
+    }
+
+    public static boolean isExists(BigDecimal check) {
+        return (check != null);
     }
 
     private MatchQuery createMatchQuery(String field, String value) {

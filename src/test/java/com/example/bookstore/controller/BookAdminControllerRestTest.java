@@ -8,10 +8,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.bookstore.config.DaoAuthenticationProviderConfig;
 import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.exception.BookStoreException;
 import com.example.bookstore.service.BookAdminService;
+import com.example.bookstore.service.security.JpaUserDetailsService;
 import com.example.bookstore.web.ApiExceptionHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,13 +23,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 
 @WebMvcTest(BookAdminController.class)
-
-@Import({com.example.bookstore.config.SecurityConfig.class, ApiExceptionHandler.class})
+@Import({ com.example.bookstore.controller.SecurityConfig.class, DaoAuthenticationProviderConfig.class, ApiExceptionHandler.class  })
 class BookAdminControllerRestTest {
 
     @Autowired
@@ -34,6 +39,43 @@ class BookAdminControllerRestTest {
 
     @MockBean
     private BookAdminService bookAdminService;
+
+    @MockBean
+    private JpaUserDetailsService userDetailsService; // used by DaoAuthenticationProviderConfig
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
+    @BeforeEach
+    void setupMock() {
+
+        Mockito.when(passwordEncoder.encode(Mockito.anyString()))
+                .thenAnswer(inv -> "{noop}" + inv.getArgument(0));
+
+        // Specific stubs
+        Mockito.when(userDetailsService.loadUserByUsername("admin"))
+                .thenReturn(User.withUsername("admin")
+                        .password("{noop}admin123")
+                        .roles("ADMIN", "USER")
+                        .build());
+
+        Mockito.when(userDetailsService.loadUserByUsername("user"))
+                .thenReturn(User.withUsername("user")
+                        .password("{noop}user123")
+                        .roles("USER")
+                        .build());
+        Mockito.when(userDetailsService.loadUserByUsername("guest"))
+                .thenReturn(User.withUsername("user")
+                        .password("{noop}user123")
+                        .roles("GUEST")
+                        .build());
+
+
+        Mockito.when(userDetailsService.loadUserByUsername(Mockito.argThat(u ->
+                        !"admin".equals(u) && !"user".equals(u))))
+                .thenThrow(new UsernameNotFoundException("User not found"));
+
+
+    }
 
     private static final String BASE_URL = "/api/v1/admin/books";
 

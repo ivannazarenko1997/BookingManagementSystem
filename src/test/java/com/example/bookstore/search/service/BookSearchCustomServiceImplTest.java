@@ -14,6 +14,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
+import com.example.bookstore.dto.BookSearchDto;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.search.service.impl.BookSearchCustomServiceImpl;
@@ -48,8 +49,8 @@ class BookSearchCustomServiceImplTest {
 
         mockSearchResponse(doc);
         when(bookService.getDocumentsByIds(List.of(1L))).thenReturn(List.of(doc));
-
-        Page<BookSearchItem> result = service.searchBooks("Spring", null, null, null, null, null, PageRequest.of(0, 10));
+        BookSearchDto filters = BookSearchDto.builder().title("Spring").build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("Spring Boot");
@@ -58,7 +59,8 @@ class BookSearchCustomServiceImplTest {
     @Test
     void shouldReturnEmptyPageWhenNoHits() throws Exception {
         mockSearchResponse();
-        Page<BookSearchItem> result = service.searchBooks("NoMatch", null, null, null, null, null, PageRequest.of(0, 10));
+        BookSearchDto filters = BookSearchDto.builder().title("NoMatch").build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10));
         assertThat(result.getTotalElements()).isZero();
     }
 
@@ -66,7 +68,8 @@ class BookSearchCustomServiceImplTest {
     void shouldHandleSearchExceptionGracefully() throws Exception {
          when(elasticsearchClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenThrow(new RuntimeException("Search failed"));
-        Page<BookSearchItem> result = service.searchBooks("error", null, null, null, null, null, PageRequest.of(0, 10));
+        BookSearchDto filters = BookSearchDto.builder().title("error").build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10));
         assertThat(result.getTotalElements()).isZero();
     }
 
@@ -84,7 +87,8 @@ class BookSearchCustomServiceImplTest {
         when(bookService.getDocumentsByIds(List.of(1L, 2L))).thenReturn(List.of(doc2, doc1));
 
         Sort sort = Sort.by(Sort.Order.asc("title"));
-        Page<BookSearchItem> result = service.searchBooks(null, null, null, null, null, null, PageRequest.of(0, 10, sort));
+        BookSearchDto filters = BookSearchDto.builder(). build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10, sort));
 
         assertThat(result.getContent().get(0).getTitle()).isEqualTo("A");
     }
@@ -99,7 +103,8 @@ class BookSearchCustomServiceImplTest {
         when(bookService.getDocumentsByIds(List.of(3L))).thenReturn(List.of(doc));
 
         Sort sort = Sort.by(Sort.Order.asc("unknown"));
-        Page<BookSearchItem> result = service.searchBooks(null, null, null, null, null, null, PageRequest.of(0, 10, sort));
+        BookSearchDto filters = BookSearchDto.builder(). build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10, sort));
 
         assertThat(result.getContent()).hasSize(1);
     }
@@ -109,7 +114,8 @@ class BookSearchCustomServiceImplTest {
 
         when(elasticsearchClient.search(any(Function.class), eq(BookDocument.class)))
                 .thenReturn(null);
-        Page<BookSearchItem> result = service.searchBooks("nullResponse", null, null, null, null, null, PageRequest.of(0, 10));
+        BookSearchDto filters = BookSearchDto.builder().q("nullResponse"). build();
+        Page<BookSearchItem> result = service.searchBooks(filters, PageRequest.of(0, 10));
         assertThat(result.getContent()).isEmpty();
     }
 
