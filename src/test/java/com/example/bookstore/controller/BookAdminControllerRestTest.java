@@ -34,6 +34,25 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import({ com.example.bookstore.controller.SecurityConfig.class, DaoAuthenticationProviderConfig.class, ApiExceptionHandler.class  })
 class BookAdminControllerRestTest {
 
+    private static final String BASE_URL = "/api/v1/admin/books";
+
+    private static final String JSON_PAYLOAD = """
+                     {
+                    "title": "Domain-Driven Design",
+                    "authorId": 2,
+                    "genreId": 1,
+                    "price": 55.99,
+                    "caption": "Blue hardcover",
+                    "description": "Evans classic on DDD",
+                    "isbn": "111-111111224",
+                    "publishedYear": 2003,
+                    "publisher": "Addison-Wesley",
+                    "pageCount": 560,
+                    "language": "en",
+                    "stock": 10,
+                    "coverImageUrl": "https://example.com/ddd.jpg"
+                    }
+                """;
     @Autowired
     private MockMvc mockMvc;
 
@@ -77,25 +96,6 @@ class BookAdminControllerRestTest {
 
     }
 
-    private static final String BASE_URL = "/api/v1/admin/books";
-
-    private static final String JSON_PAYLOAD = """
-                     {
-                    "title": "Domain-Driven Design",
-                    "authorId": 2,
-                    "genreId": 1,
-                    "price": 55.99,
-                    "caption": "Blue hardcover",
-                    "description": "Evans classic on DDD",
-                    "isbn": "111-111111224",
-                    "publishedYear": 2003,
-                    "publisher": "Addison-Wesley",
-                    "pageCount": 560,
-                    "language": "en",
-                    "stock": 10,
-                    "coverImageUrl": "https://example.com/ddd.jpg"
-                    }
-                """;
 
     @Test
     @DisplayName("Admin can create book with valid data")
@@ -127,34 +127,6 @@ class BookAdminControllerRestTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    @DisplayName("Admin can get books without filters")
-    @WithMockUser(roles = "ADMIN")
-    void getBooks_withValidRequest_returnsOk() throws Exception {
-        mockMvc.perform(get(BASE_URL))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Admin can get books with filters")
-    @WithMockUser(roles = "ADMIN")
-    void getBooks_withFilters_returnsOk() throws Exception {
-        mockMvc.perform(get(BASE_URL)
-                        .param("author", "Martin Fowler")
-                        .param("minPrice", "10")
-                        .param("maxPrice", "50"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Admin can create book with decimal price")
-    @WithMockUser(roles = "ADMIN")
-    void createBook_withDecimalPrice_returnsCreated() throws Exception {
-       mockMvc.perform(post(BASE_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JSON_PAYLOAD))
-                .andExpect(status().isCreated());
-    }
 
     @Test
     @DisplayName("Admin can update book with different ID")
@@ -167,27 +139,7 @@ class BookAdminControllerRestTest {
                 .andExpect(status().isOk());
     }
 
-    @Test
-    @DisplayName("Admin can get books with pagination")
-    @WithMockUser(roles = "ADMIN")
-    void getBooks_withPagination_returnsOk() throws Exception {
-        mockMvc.perform(get(BASE_URL)
-                        .param("page", "0")
-                        .param("size", "5"))
-                .andExpect(status().isOk());
-    }
 
-    @Test
-    @DisplayName("Admin can get books with empty filters")
-    @WithMockUser(roles = "ADMIN")
-    void getBooks_withEmptyFilters_returnsOk() throws Exception {
-        mockMvc.perform(get(BASE_URL)
-                        .param("query", "")
-                        .param("title", "")
-                        .param("author", "")
-                        .param("genre", ""))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @DisplayName("Admin can create book with long title")

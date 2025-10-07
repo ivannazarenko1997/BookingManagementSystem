@@ -18,7 +18,11 @@ public class SecurityConfig {
     private static final String[] OPEN_API_PATHS = {
             "/v3/api-docs/**",
             "/swagger-ui.html",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+            "/actuator/**",
+            "/actuator/metrics/**",
+            "/actuator/prometheus"
+
     };
 
     @Bean

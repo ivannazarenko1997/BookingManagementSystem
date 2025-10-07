@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.bookstore.config.DaoAuthenticationProviderConfig;
@@ -17,6 +18,7 @@ import com.example.bookstore.search.service.BookSearchCustomService;
 import com.example.bookstore.service.security.JpaUserDetailsService;
 import com.example.bookstore.web.ApiExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -41,7 +43,23 @@ import java.util.Collections;
 @Import({ SecurityConfig.class, DaoAuthenticationProviderConfig.class, ApiExceptionHandler.class  })
 class BookControllerDBTest {
     private static final String URL_SEARCH = "/api/v1/books/db";
-
+    private static final String JSON_PAYLOAD = """
+                     {
+                    "title": "Domain-Driven Design",
+                    "authorId": 2,
+                    "genreId": 1,
+                    "price": 55.99,
+                    "caption": "Blue hardcover",
+                    "description": "Evans classic on DDD",
+                    "isbn": "111-111111224",
+                    "publishedYear": 2003,
+                    "publisher": "Addison-Wesley",
+                    "pageCount": 560,
+                    "language": "en",
+                    "stock": 10,
+                    "coverImageUrl": "https://example.com/ddd.jpg"
+                    }
+                """;
     @Autowired
     private MockMvc mockMvc;
 
@@ -175,6 +193,16 @@ class BookControllerDBTest {
                 .andExpect(status().isOk());
 
         verify(bookSearchService).searchDb(  any(), any() );
+    }
+    @Test
+    @DisplayName("Admin can get books with filters")
+    @WithMockUser(roles = "ADMIN")
+    void getBooks_withFilters_returnsOk() throws Exception {
+        mockMvc.perform(get(URL_SEARCH)
+                        .param("author", "Martin Fowler")
+                        .param("minPrice", "10")
+                        .param("maxPrice", "50"))
+                .andExpect(status().isOk());
     }
 
 }
