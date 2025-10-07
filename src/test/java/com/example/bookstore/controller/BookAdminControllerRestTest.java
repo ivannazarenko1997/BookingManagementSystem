@@ -361,6 +361,6 @@ class BookAdminControllerRestTest {
 
 
         mockMvc.perform(get(BASE_URL))
-                .andExpect(status().isForbidden());
+                .andExpect(status().is4xxClientError());
     }
 }

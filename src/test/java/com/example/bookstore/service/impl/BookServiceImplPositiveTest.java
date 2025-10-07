@@ -9,9 +9,11 @@ import static org.mockito.Mockito.when;
 import com.example.bookstore.cache.BookCache;
 import com.example.bookstore.domain.Book;
 import com.example.bookstore.domain.BookIndexProjection;
+import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.search.model.BookDocument;
 import com.example.bookstore.service.BookService;
+import com.example.bookstore.service.filter.BookFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 class BookServiceImplPositiveTest {
@@ -115,4 +118,7 @@ class BookServiceImplPositiveTest {
 
         assertThat(result.getContent()).hasSize(1);
     }
+
+
+
 }

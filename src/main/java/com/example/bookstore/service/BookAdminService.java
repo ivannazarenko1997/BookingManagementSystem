@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BookAdminService {
-    Page<BookResponse> list(BookFilter filter, Pageable pageable);
 
     BookResponse create(BookRequest req);
 

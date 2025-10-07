@@ -56,19 +56,6 @@ public class BookAdminController {
         return bookAdminService.get(id);
     }
 
-    @GetMapping
-    public Page<BookResponse> getBooks(
-            @ParameterObject Pageable pageable,
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String genre,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice
-    ) {
-        BookFilter filter = new BookFilter(query, title, author, genre, minPrice, maxPrice);
-        return bookAdminService.list(filter, pageable);
-    }
 }
 
 

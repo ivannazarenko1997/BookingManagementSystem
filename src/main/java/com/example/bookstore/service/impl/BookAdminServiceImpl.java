@@ -66,19 +66,6 @@ public class BookAdminServiceImpl implements BookAdminService {
                 .register(this.meterRegistry);
     }
 
-    @Override
-    public Page<BookResponse> list(BookFilter filter, Pageable pageable) {
-        Specification<Book> specification = BookSpecs.matches(
-                filter.getQuery(),
-                filter.getTitle(),
-                filter.getAuthor(),
-                filter.getGenre(),
-                filter.getMinPrice(),
-                filter.getMaxPrice()
-        );
-        return bookService.findAll(pageable, specification).map(BookMapper::toDto);
-    }
-
     @Transactional
     @Timed(value = "books.create.timer", description = "Time to handle create-book command")
     public BookResponse create(BookRequest request) {

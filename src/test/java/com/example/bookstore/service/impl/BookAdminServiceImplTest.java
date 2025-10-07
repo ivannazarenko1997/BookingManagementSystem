@@ -54,19 +54,6 @@ class BookAdminServiceImplTest {
 
     }
 
-    @Test
-    void shouldListBooksWithFilter() {
-        BookFilter filter =
-                new BookFilter("query", "title", "author", "genre", BigDecimal.TEN, BigDecimal.valueOf(100));
-        Pageable pageable = PageRequest.of(0, 10);
-        Book book = new Book();
-        book.setId(1L);
-        when(bookService.findAll(any(), any())).thenReturn(new PageImpl<>(List.of(book)));
-
-        Page<BookResponse> result = service.list(filter, pageable);
-
-        assertThat(result.getTotalElements()).isEqualTo(1);
-    }
 
     @Test
     void shouldCreateBookSuccessfully() {
