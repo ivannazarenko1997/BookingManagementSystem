@@ -114,7 +114,7 @@ public class BookSearchCustomServiceImpl implements BookSearchCustomService {
 
             if (StringUtils.hasText(dto.getOrder())) {
                 Sort.Direction dir = "desc".equalsIgnoreCase(dto.getOrder()) ? Sort.Direction.DESC : Sort.Direction.ASC;
-                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(dir, "price"));
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(dir, PRICE));
             }
 
             return bookService.findAll(pageable,spec)

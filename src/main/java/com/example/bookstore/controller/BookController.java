@@ -4,7 +4,6 @@ import com.example.bookstore.dto.BookResponse;
 import com.example.bookstore.dto.BookSearchDto;
 import com.example.bookstore.search.dto.BookSearchItem;
 import com.example.bookstore.search.service.BookSearchCustomService;
-import com.example.bookstore.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -15,10 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/v1/books")

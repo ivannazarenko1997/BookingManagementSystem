@@ -23,6 +23,6 @@ public class InMemoryUsersConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // fine for tests
+        return NoOpPasswordEncoder.getInstance();
     }
 }
